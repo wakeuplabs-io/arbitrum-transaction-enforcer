@@ -27,7 +27,7 @@ const l2Networks = {
 export default function useArbitrumBridge() {
   const parentChainId = sepolia.id;
   const childNetworkId = l2Networks[parentChainId];
-  const { switchChainAsync } = useSwitchChain();
+  const {  switchChainAsync } = useSwitchChain();
   const { address } = useAccount();
   const signer = useEthersSigner();
   const provider = useEthersProvider();

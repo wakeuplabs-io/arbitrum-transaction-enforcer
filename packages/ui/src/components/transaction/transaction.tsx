@@ -23,8 +23,8 @@ export default function TransactionScreen() {
   const [currentTx, setCurrentTx] = useState<Transaction | null>();
   const { initiateWithdraw } = useArbitrumBridge();
 
-  const onReviewSubmit = async () => {
-    initiateWithdraw(amountInWei)
+  const onReviewSubmit = () => {
+    return initiateWithdraw(amountInWei)
       .then((x) => {
         console.log(x)
 

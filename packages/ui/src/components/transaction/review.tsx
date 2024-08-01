@@ -13,22 +13,21 @@ export default function TransactionReview({
   onBack,
 }: {
   amountInWei: string;
-  onSubmit(): void;
+  onSubmit(): Promise<unknown>;
   onBack(): void;
 }) {
   const [approvedAproxFees, setApprovedAproxFees] = useState<boolean>(false);
   const [approvedSequencerMaySpeedUp, setApprovedSequencerMaySpeedUp] =
     useState<boolean>(false);
   const [approvedTime, setApprovedTime] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const canContinue = useMemo(() => {
     return approvedAproxFees && approvedSequencerMaySpeedUp && approvedTime;
   }, [approvedAproxFees, approvedSequencerMaySpeedUp, approvedTime]);
 
   return (
-    <div
-      className="flex flex-col max-w-xl mx-auto gap-6"
-    >
+    <div className="flex flex-col max-w-xl mx-auto gap-6">
       <button className="flex items-center flex-row gap-3" onClick={onBack}>
         <img src={ChevronLeftIcon} />
         <div className="font-semibold text-xl">Review and confirm</div>
@@ -133,10 +132,13 @@ export default function TransactionReview({
           border: "1px solid black",
           borderRadius: 16,
         }}
-        disabled={!canContinue}
-        onClick={onSubmit}
+        disabled={!canContinue || loading}
+        onClick={() => {
+          setLoading(true);
+          onSubmit().finally(() => setLoading(false));
+        }}
       >
-        Confirm Withdrawal
+        {loading ? "Loading..." : "Confirm Withdrawal"}
       </button>
     </div>
   );
