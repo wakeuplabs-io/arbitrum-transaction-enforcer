@@ -148,10 +148,12 @@ export default function TransactionAmount({
           className={cn(
             "btn btn-primary rounded-3xl disabled:text-neutral-200"
           )}
-          disabled={!address}
+          disabled={!address || !arbBalance}
         >
           {address
-            ? "Continue"
+            ? arbBalance
+              ? "Continue"
+              : "loading balance"
             : "Connect your wallet to withdraw"}
         </button>
       </div>
