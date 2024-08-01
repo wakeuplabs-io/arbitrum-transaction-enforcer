@@ -4,7 +4,7 @@ export default function TopBarLayout(props: { children: React.ReactNode }) {
   return (
     <div>
       <Topbar />
-      <div className="py-10 px-4">{props.children}</div>
+      <main className="py-10 px-4">{props.children}</main>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import TopBarLayout from "@/layouts/topbar";
 import { ChevronLeftIcon } from "lucide-react";
+import { shortenAddress } from "@/lib/shorten-address";
 
 export default function ActivityScreen() {
   const navigate = useNavigate();
@@ -16,9 +17,9 @@ export default function ActivityScreen() {
     <TopBarLayout>
       <div className="flex flex-col max-w-xl mx-auto">
         <div className="flex space-x-3 items-center mb-8">
-          <button onClick={() => navigate("/")}>
+          <Link to="/">
             <ChevronLeftIcon className="h-5 w-5" />
-          </button>
+          </Link>
           <h1 className="flex text-xl font-semibold">
             My activity
           </h1>
@@ -29,12 +30,12 @@ export default function ActivityScreen() {
             {txHistory.map((x) => (
               <li key={x.bridgeHash} className="list-disc ml-4">
                 {shortenAddress(x.bridgeHash)}{" "}
-                <button
+                <Link
                   className="link"
-                  onClick={() => navigate(`/activity/${x.bridgeHash}`)}
+                  to={`/activity/${x.bridgeHash}`}
                 >
                   View detail
-                </button>
+                </Link>
               </li>
             ))}
           </ul>
@@ -65,6 +66,3 @@ export default function ActivityScreen() {
   );
 }
 
-function shortenAddress(add: string) {
-  return add.slice(0, 4) + "..." + add.slice(add.length - 4);
-}

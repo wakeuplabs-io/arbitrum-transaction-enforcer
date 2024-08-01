@@ -15,9 +15,9 @@ import { useAccount } from "wagmi";
 
 export default function HomeScreen() {
   const navigate = useNavigate();
-  const { openConnectModal } = useConnectModal();
   const { address } = useAccount();
   const arbBalance = useArbitrumBalance();
+  const { openConnectModal } = useConnectModal();
   const [amountEth, setAmountEth] = useState<string>("0");
 
   function handleSubmit() {

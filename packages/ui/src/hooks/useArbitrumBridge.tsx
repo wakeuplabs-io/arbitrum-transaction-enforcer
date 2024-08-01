@@ -71,7 +71,6 @@ export default function useArbitrumBridge() {
       throw new Error(`Failed to send tx to l1 delayed inbox!`);
     }
     const inboxRec = await resultsL1.wait();
-    console.log("inboxRec", inboxRec)
 
     return { l2Txhash, l1Txhash: inboxRec.transactionHash };
   }

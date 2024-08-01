@@ -13,16 +13,13 @@ export class TransactionsStorageService {
   }
 
   getByBridgeHash(hash: string): Transaction | null {
-    const txs = this.getAll()
-    return txs.find(t => t.bridgeHash.toLowerCase() === hash.toLowerCase()) ?? null
+    return this.getAll().find(t => t.bridgeHash.toLowerCase() === hash.toLowerCase()) ?? null
   }
 
   create(tx: Transaction): void {
-    const txs = this.getAll()
-
     localStorage.setItem(
       this.storageKey,
-      JSON.stringify([...txs, tx])
+      JSON.stringify([...this.getAll(), tx])
     );
   }
 
