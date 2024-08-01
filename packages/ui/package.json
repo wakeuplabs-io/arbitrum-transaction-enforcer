@@ -22,6 +22,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "7.52.1",
+    "react-router-dom": "^6.25.1",
     "viem": "2.17.3",
     "wagmi": "2.10.10"
   },

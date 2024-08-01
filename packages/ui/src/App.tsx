@@ -6,6 +6,18 @@ import "./App.css";
 import Topbar from "./components/layout/topbar";
 import Transaction from "./components/transaction/transaction";
 import config from "./lib/wagmiConfig";
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import HomeScreen from "./screens/home";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <HomeScreen />,
+  },
+]);
 
 export default function App() {
   const queryClient = new QueryClient();
@@ -18,10 +30,11 @@ export default function App() {
           coolMode
           theme={lightTheme({ borderRadius: "medium" })}
         >
-          <div className="flex flex-col w-full grow min-h-screen  bg-cover text-primary">
+          <RouterProvider router={router} />
+          {/* <div className="flex flex-col w-full grow min-h-screen  bg-cover text-primary">
             <Topbar />
             <Transaction />
-          </div>
+          </div> */}
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
