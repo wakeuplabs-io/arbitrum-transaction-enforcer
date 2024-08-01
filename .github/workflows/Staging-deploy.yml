@@ -1,0 +1,48 @@
+name: Staging-deploy
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build all
+        run: pnpm build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: sa-east-1
+
+      - name: SAM Build
+        run: sam build
+
+      - name: SAM Deploy
+        run: sam deploy --stack-name staging-${{ vars.STACK_NAME }} --parameter-overrides StackName=staging-${{ vars.STACK_NAME }} DomainName=${{vars.UI_DOMAIN}}
+
+      - name: Deploy UI to s3
+        working-directory: ./packages/ui
+        run: |
+          aws s3 sync dist s3://staging-${{ vars.STACK_NAME }}.${{vars.UI_DOMAIN}}/
+
+      - name: Invalidate UI Cloudfront Distribution
+        run: |
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name staging-${{ vars.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)
+          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
