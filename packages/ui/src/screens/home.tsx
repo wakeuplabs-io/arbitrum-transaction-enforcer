@@ -1,6 +1,5 @@
 import ArbitrumIcon from "@/assets/arbitrum-icon.svg";
 import ArrowRightIcon from "@/assets/arrow-right.svg";
-import ChevronDownIcon from "@/assets/chevron-down.svg";
 import EthereumIcon from "@/assets/ethereum-icon.svg";
 import WalletIcon from "@/assets/wallet.svg";
 import CustomConnectButton from "@/components/styled/connectButton/customConnectButton";
@@ -132,9 +131,13 @@ export default function HomeScreen() {
             className={cn(
               "btn btn-primary rounded-3xl disabled:text-neutral-200"
             )}
-            disabled={!address}
+            disabled={!address || !arbBalance}
           >
-            {address ? "Continue" : "Connect your wallet to withdraw"}
+            {address
+              ? arbBalance
+                ? "Loading balance..."
+                : "Continue"
+              : "Connect your wallet to withdraw"}
           </button>
         </div>
       </form>
