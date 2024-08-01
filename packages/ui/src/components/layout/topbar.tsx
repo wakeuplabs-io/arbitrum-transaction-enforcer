@@ -1,5 +1,6 @@
 import ArbitrumConnectIcon from "@/assets/arbitrum-connect.svg";
 import CustomConnectButton from "@/components/styled/connectButton/customConnectButton";
+import { Link } from "react-router-dom";
 
 export default function Topbar() {
   return (
@@ -11,7 +12,12 @@ export default function Topbar() {
             <b>Arbitrum</b> Connect
           </span>
         </div>
-        <CustomConnectButton border="square" />
+        <div className="flex space-x-3">
+          <Link to="/activity" className="btn btn-outline rounded-2xl hover:border-gray-300 hover:text-gray-500">
+            My activity
+          </Link>
+          <CustomConnectButton border="square" />
+        </div>
       </div>
     </header>
   );
