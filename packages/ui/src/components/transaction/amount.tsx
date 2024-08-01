@@ -153,7 +153,7 @@ export default function TransactionAmount({
           {address
             ? arbBalance
               ? "Continue"
-              : "loading balance"
+              : "Loading balance..."
             : "Connect your wallet to withdraw"}
         </button>
       </div>
