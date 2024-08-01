@@ -16,7 +16,7 @@ export default function ActivityScreen() {
     <TopBarLayout>
       <div className="flex flex-col max-w-xl mx-auto">
         <div className="flex space-x-3 items-center mb-8">
-          <button onClick={() => navigate(-1)}>
+          <button onClick={() => navigate("/")}>
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
           <h1 className="flex text-xl font-semibold">

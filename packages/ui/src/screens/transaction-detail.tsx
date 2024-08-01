@@ -2,7 +2,7 @@ import BellIcon from "@/assets/bell.svg";
 import CheckGreenIcon from "@/assets/check-green.svg";
 import cn from "classnames";
 import { ArrowUpRight } from "lucide-react";
-import useArbitrumBridge from "@/hooks/useArbitrum";
+import useArbitrumBridge from "@/hooks/useArbitrumBridge";
 import { formatEther } from "viem";
 import { transactionsStorageService } from "@/lib/transactions";
 import { useNavigate, useParams } from "react-router-dom";

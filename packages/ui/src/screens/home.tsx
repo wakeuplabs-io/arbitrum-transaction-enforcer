@@ -85,7 +85,6 @@ export default function HomeScreen() {
                 >
                   Max
                 </button>
-                <img src={ChevronDownIcon} />
               </div>
             </div>
           </div>
