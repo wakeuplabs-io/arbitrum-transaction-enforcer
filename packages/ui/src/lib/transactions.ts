@@ -3,6 +3,7 @@ export interface Transaction {
   bridgeHash: string;
   delayedInboxHash: string;
   amount: string;
+  timestamp?: number;
 }
 
 export class TransactionsStorageService {

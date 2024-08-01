@@ -7,6 +7,9 @@ import { formatEther } from "viem";
 import { transactionsStorageService } from "@/lib/transactions";
 import { useNavigate, useParams } from "react-router-dom";
 import TopBarLayout from "@/layouts/topbar";
+import { AddToCalendarLink } from "@/components/add-to-calendar";
+import { GoogleCalendarIcon } from "@/components/icons";
+import { ONE_HOUR } from "@/lib/add-to-calendar";
 
 export default function TransactionDetailScreen() {
   const { tx } = useParams();
@@ -66,8 +69,8 @@ export default function TransactionDetailScreen() {
             <Step
               number={2}
               title="Force transaction"
-              description="If after 24 hours your arbutrum transaction hasn't been minted, you can push it forward manually with some extra fee in ethereum"
-              className="pt-2"
+              description="If after 24 hours your Arbitrum transaction hasn't been mined, you can push it forward manually with some extra fee in ethereum"
+              className="pt-2 space-y-2"
             >
               <button
                 onClick={() => {
@@ -81,6 +84,18 @@ export default function TransactionDetailScreen() {
               >
                 Force include
               </button>
+              <AddToCalendarLink
+                className="btn btn-sm space-x-1"
+                event={{
+                  title: "Push forward your transaction",
+                  description: "Wait is over, if your transaction hasn't go through by now, you can force include it from Arbitrum connect.",
+                  startDate: new Date((transaction.timestamp ?? Date.now()) + 24 * ONE_HOUR),
+                  endDate: new Date((transaction.timestamp ?? Date.now()) + 25 * ONE_HOUR),
+                }}
+              >
+                <GoogleCalendarIcon className="h-4 w-4" />
+                <span>Create reminder</span>
+              </AddToCalendarLink>
             </Step>
 
             <Step

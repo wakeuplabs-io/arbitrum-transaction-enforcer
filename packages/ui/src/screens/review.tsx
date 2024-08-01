@@ -34,6 +34,7 @@ export default function ReviewScreen() {
           bridgeHash: x.l2Txhash,
           delayedInboxHash: x.l1Txhash,
           amount: amountInWei as string,
+          timestamp: Date.now()
         };
         transactionsStorageService.create(tx);
         navigate(`/activity/${tx.bridgeHash}`);
