@@ -46,7 +46,7 @@ export default function TransactionDetailScreen() {
               className="pt-2 flex space-x-4"
             >
               <a
-                href={`https://sepolia-explorer.arbitrum.io/tx/${transaction.bridgeHash}`}
+                href={`https://sepolia.arbiscan.io/tx/${transaction.bridgeHash}`}
                 target="_blank"
                 className="link text-sm flex space-x-1 items-center"
               >

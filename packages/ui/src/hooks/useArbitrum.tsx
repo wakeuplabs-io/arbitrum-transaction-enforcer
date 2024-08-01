@@ -27,30 +27,32 @@ const l2Networks = {
 export default function useArbitrumBridge() {
   const parentChainId = sepolia.id;
   const childNetworkId = l2Networks[parentChainId];
-  const { switchChainAsync } = useSwitchChain();
-  const { chain, address } = useAccount();
+  const {  switchChainAsync } = useSwitchChain();
+  const { address } = useAccount();
   const signer = useEthersSigner();
   const provider = useEthersProvider();
 
   async function ensureChainId(chainId: number) {
-    if (chain?.id !== chainId) {
-      await switchChainAsync({ chainId });
-    }
+    await switchChainAsync({ chainId });
   }
 
-  async function getSigner(chainId: number): Promise<ethers.providers.JsonRpcSigner> {
-    await ensureChainId(chainId)
+  async function getSigner(
+    chainId: number
+  ): Promise<ethers.providers.JsonRpcSigner> {
+    await ensureChainId(chainId);
 
-    if (!signer) throw new Error("No signer")
+    if (!signer) throw new Error("No signer");
     return signer;
   }
 
-  async function  getProvider(chainId: number): Promise<ethers.providers.JsonRpcProvider> {
+  async function getProvider(
+    chainId: number
+  ): Promise<ethers.providers.JsonRpcProvider> {
     // TODO: let's use custom providers
-    await ensureChainId(chainId)
+    await ensureChainId(chainId);
 
-    if (!provider) throw new Error("No provider")
-    return provider
+    if (!provider) throw new Error("No provider");
+    return provider;
   }
 
   async function sendWithDelayedInbox(tx: any) {
@@ -58,7 +60,7 @@ export default function useArbitrumBridge() {
     const inboxSdk = new InboxTools(signer!, l2Network);
 
     // extract l2's tx hash first so we can check if this tx executed on l2 later.
-    const l2Signer = await getSigner(childNetworkId)
+    const l2Signer = await getSigner(childNetworkId);
     const l2SignedTx = await inboxSdk.signChildTx(tx, l2Signer);
     const l2Txhash = l2SignedTx;
 
@@ -87,7 +89,7 @@ export default function useArbitrumBridge() {
     const l2Network = getArbitrumNetwork(childNetworkId);
     const inboxTools = new InboxTools(l1Wallet, l2Network);
 
-    if (!await inboxTools.getForceIncludableEvent()) {
+    if (!(await inboxTools.getForceIncludableEvent())) {
       throw new Error("Force inclusion is not possible");
     }
 
@@ -131,7 +133,6 @@ export default function useArbitrumBridge() {
     }
 
     const l2Provider = await getProvider(childNetworkId);
-    
 
     // First, let's find the Arbitrum txn from the txn hash provided
     const receipt = await l2Provider.getTransactionReceipt(l2TxnHash);
@@ -173,7 +174,6 @@ export default function useArbitrumBridge() {
       throw new Error(`Hmm, ${l2TxnHash} doesn't look like a txn hash...`);
     }
 
-    
     // First, let's find the Arbitrum txn from the txn hash provided
     const l2Provider = await getProvider(childNetworkId);
     const receipt = await l2Provider.getTransactionReceipt(l2TxnHash);

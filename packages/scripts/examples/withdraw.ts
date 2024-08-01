@@ -33,7 +33,7 @@ async function initiateWithdraw() {
 // Uncomment to run each test
 
 // Initiates a withdraw of funds through the delayed inbox. Make sure to make note on the l2Hash for later
-// initiateWithdraw().then(console.log)
+initiateWithdraw().then(console.log)
 
 // If the sequencer didn't take our tx for 24 hours, this should be true
 // isForceIncludePossible(l1Wallet, l2Wallet).then(console.log)

@@ -1,4 +1,4 @@
-import { isChainSupported } from "@/lib/wagmiConfig";
+import { isChainSupported } from "@/lib/wagmi-config";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
