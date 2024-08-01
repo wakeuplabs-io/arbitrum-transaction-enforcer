@@ -1,15 +1,15 @@
-import Topbar from "@/components/layout/topbar";
+import TopBarLayout from "@/layouts/topbar";
+import { useNavigate } from "react-router-dom";
 
 export default function HomeScreen() {
+const navigate = useNavigate()
+
   return (
-    <div>
-      <Topbar />
-      <div className="py-10 px-4">
+    <TopBarLayout>
         <div className="flex gap-2 justify-center">
-          <button className="btn">New Tx</button>
-          <button className="btn">Last Txs</button>
+          <button className="btn" onClick={() => navigate("/amount")}>New Tx</button>
+          <button className="btn" onClick={() => navigate("/activity")}>Last Txs</button>
         </div>
-      </div>
-    </div>
+    </TopBarLayout>
   );
 }

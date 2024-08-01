@@ -1,19 +1,18 @@
 import { useState, useEffect  } from "react";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
+import { useNavigate } from "react-router-dom";
+import TopBarLayout from "@/layouts/topbar";
 
-export default function TransactionsActivity(props: {
-  setCurrentTx: (tx: Transaction) => unknown;
-  onBack(): void;
-}) {
+export default function ActivityScreen() {
+  const navigate = useNavigate()
   const [txHistory, setTxHistory] = useState<Transaction[]>([])
 
   useEffect(() => {
-    setTxHistory(transactionsStorageService.getTransactions())
+    setTxHistory(transactionsStorageService.getAll())
   }, []);
 
-
   return (
-    <>
+    <TopBarLayout>
       <div className="flex flex-col max-w-xl mx-auto">
         <div className="flex justify-self-start text-xl font-semibold mb-8">
           My activity
@@ -23,7 +22,7 @@ export default function TransactionsActivity(props: {
             {txHistory.map((x) => (
               <li key={x.bridgeHash} className="list-disc ml-4">
                 {shortenAddress(x.bridgeHash)}{" "}
-                <button className="link" onClick={() => props.setCurrentTx(x)}>
+                <button className="link" onClick={() => navigate(`/activity/${x.bridgeHash}`)}>
                   View detail
                 </button>
               </li>
@@ -52,11 +51,11 @@ export default function TransactionsActivity(props: {
           </ul> */}
         </div>
 
-        <button className="btn mt-10" onClick={props.onBack}>
+        <button className="btn mt-10" onClick={() => navigate(-1)}>
           Go back
         </button>
       </div>
-    </>
+    </TopBarLayout>
   );
 }
 
