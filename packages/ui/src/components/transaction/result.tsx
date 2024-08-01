@@ -5,13 +5,22 @@ import { ArrowUpRight } from "lucide-react";
 import useArbitrumBridge from "@/hooks/useArbitrum";
 import { formatEther } from "viem";
 import { Transaction } from "@/lib/transactions";
+import { useEffect, useState } from "react";
 
 export default function TransactionResultCard(props: {
   tx: Transaction;
   onGoToActivity: () => unknown;
   onGoHome: () => unknown;
 }) {
-  const { forceInclude } = useArbitrumBridge();
+  const { forceInclude, isForceIncludePossible } = useArbitrumBridge();
+  const [canForce, setCanForce] = useState(false);
+
+  useEffect(() => {
+    const initializeForceInclude = async () => {
+      setCanForce(await isForceIncludePossible());
+    }
+    initializeForceInclude();
+  }, [])
 
   return (
     <div className="flex flex-col gap-6 max-w-xl mx-auto">
@@ -68,7 +77,8 @@ export default function TransactionResultCard(props: {
                   )
                 );
               }}
-              className="btn btn-sm"
+              className={cn("btn btn-primary btn-sm", { "btn-disabled": !canForce })}
+              disabled={!canForce}
             >
               Force include
             </button>
