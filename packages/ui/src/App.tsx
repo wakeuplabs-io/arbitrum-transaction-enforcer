@@ -4,8 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import "./App.css";
 import Topbar from "./components/layout/topbar";
-import Transaction from "./components/transaction/transaction";
-import config from "./lib/wagmiConfig";
+import TransactionScreen from "./components/transaction/transaction";
+import config from "./lib/wagmi-config";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -18,6 +18,8 @@ const router = createBrowserRouter([
     element: <HomeScreen />,
   },
 ]);
+
+
 
 export default function App() {
   const queryClient = new QueryClient();

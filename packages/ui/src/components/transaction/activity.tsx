@@ -1,10 +1,17 @@
-import { Transaction } from "./transaction";
+import { useState, useEffect  } from "react";
+import { Transaction, transactionsStorageService } from "@/lib/transactions";
 
 export default function TransactionsActivity(props: {
-  txHistory: Transaction[];
   setCurrentTx: (tx: Transaction) => unknown;
   onBack(): void;
 }) {
+  const [txHistory, setTxHistory] = useState<Transaction[]>([])
+
+  useEffect(() => {
+    setTxHistory(transactionsStorageService.getTransactions())
+  }, []);
+
+
   return (
     <>
       <div className="flex flex-col max-w-xl mx-auto">
@@ -13,7 +20,7 @@ export default function TransactionsActivity(props: {
         </div>
         <div className="flex">
           <ul>
-            {props.txHistory.map((x) => (
+            {txHistory.map((x) => (
               <li key={x.bridgeHash} className="list-disc ml-4">
                 {shortenAddress(x.bridgeHash)}{" "}
                 <button className="link" onClick={() => props.setCurrentTx(x)}>

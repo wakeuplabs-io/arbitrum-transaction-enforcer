@@ -1,10 +1,11 @@
 import useArbitrumBridge from "@/hooks/useArbitrum";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import TermsModal from "../layout/terms-modal";
 import TransactionResultCard from "./result";
 import TransactionsActivity from "./activity";
 import TransactionAmount from "./amount";
 import TransactionReview from "./review";
+import { Transaction, transactionsStorageService } from "@/lib/transactions";
 
 enum STEPS {
   menu,
@@ -14,37 +15,27 @@ enum STEPS {
   result,
 }
 
-export interface Transaction {
-  bridgeHash: string;
-  delayedInboxHash: string;
-  amount: string;
-}
 
-export default function Transaction() {
+export default function TransactionScreen() {
   const [currentStep, setCurrentStep] = useState(STEPS.menu);
   const [amountInWei, setAmountInWei] = useState<string>("0");
   const [showModal, setShowModal] = useState(true);
-  const [txHistory, setTxHistory] = useState<Transaction[]>([]);
   const [currentTx, setCurrentTx] = useState<Transaction | null>();
   const { initiateWithdraw } = useArbitrumBridge();
 
   const onReviewSubmit = async () => {
     initiateWithdraw(amountInWei)
       .then((x) => {
-        console.log("Transaction hashes: ", x);
+        console.log(x)
 
         const tx: Transaction = {
           bridgeHash: x.l2Txhash,
           delayedInboxHash: x.l1Txhash,
           amount: amountInWei,
         };
-
-        localStorage.setItem(
-          "transactions",
-          JSON.stringify([...txHistory, tx])
-        );
-
+        transactionsStorageService.pushTransaction(tx)
         setCurrentTx(tx);
+
         setCurrentStep(STEPS.result);
       })
       .catch((e) => {
@@ -53,9 +44,6 @@ export default function Transaction() {
       });
   };
 
-  useEffect(() => {
-    setTxHistory(JSON.parse(localStorage.getItem("transactions") ?? "[]"));
-  }, []);
 
   return (
     <div className="py-10 px-4">
@@ -71,7 +59,6 @@ export default function Transaction() {
       )}
       {currentStep === STEPS.list && (
         <TransactionsActivity
-          txHistory={txHistory}
           setCurrentTx={(tx) => {
             setCurrentTx(tx)
             setCurrentStep(STEPS.result);

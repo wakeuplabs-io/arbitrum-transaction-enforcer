@@ -2,9 +2,9 @@ import BellIcon from "@/assets/bell.svg";
 import CheckGreenIcon from "@/assets/check-green.svg";
 import cn from "classnames";
 import { ArrowUpRight } from "lucide-react";
-import { Transaction } from "./transaction";
 import useArbitrumBridge from "@/hooks/useArbitrum";
 import { formatEther } from "viem";
+import { Transaction } from "@/lib/transactions";
 
 export default function TransactionResultCard(props: {
   tx: Transaction;
