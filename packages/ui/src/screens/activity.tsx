@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
 import { Link } from "react-router-dom";
 import TopBarLayout from "@/layouts/topbar";
-import { ChevronLeftIcon } from "lucide-react";
+import { ArrowUpRightIcon, ChevronLeftIcon } from "lucide-react";
 import { shortenAddress } from "@/lib/shorten-address";
+import EthereumIcon from "@/assets/ethereum-icon.svg";
+import { formatEther, parseEther } from "viem";
+import { BigNumber } from "ethers";
 
 export default function ActivityScreen() {
   const [txHistory, setTxHistory] = useState<Transaction[]>([]);
@@ -19,23 +22,32 @@ export default function ActivityScreen() {
           <Link to="/">
             <ChevronLeftIcon className="h-5 w-5" />
           </Link>
-          <h1 className="flex text-xl font-semibold">
-            My activity
-          </h1>
+          <h1 className="flex text-xl font-semibold">My activity</h1>
         </div>
 
         <div className="flex">
-          <ul>
+          <ul className="border w-full rounded-2xl">
             {txHistory.map((x) => (
-              <li key={x.bridgeHash} className="list-disc ml-4">
-                {shortenAddress(x.bridgeHash)}{" "}
-                <Link
-                  className="link"
-                  to={`/activity/${x.bridgeHash}`}
+              <Link to={`/activity/${x.bridgeHash}`}>
+                <li
+                  key={x.bridgeHash}
+                  className="flex space-x-5 py-5 px-5 rounded-2xl hover:bg-gray-50"
                 >
-                  View detail
-                </Link>
-              </li>
+                  <img src={EthereumIcon} />
+                  <div className="flex justify-between w-full items-center">
+                    <div>
+                      <span className="block">Withdrawal</span>
+                      <span className="block">
+                        {shortenAddress(x.bridgeHash)}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span>{`${formatEther(BigInt(x.amount))}`} ETH</span>
+                      <ArrowUpRightIcon className="h-4 w-4" />
+                    </div>
+                  </div>
+                </li>
+              </Link>
             ))}
           </ul>
 
@@ -64,4 +76,3 @@ export default function ActivityScreen() {
     </TopBarLayout>
   );
 }
-
