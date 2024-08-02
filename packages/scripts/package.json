@@ -10,12 +10,14 @@
   "license": "ISC",
   "dependencies": {
     "@arbitrum/sdk": "^4.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
     "ethers": "^5.7.2",
     "hardhat": "^2.22.7"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.7",
     "@types/node": "^22.0.0",
     "patch-package": "^8.0.0",
     "ts-node": "^10.9.2"

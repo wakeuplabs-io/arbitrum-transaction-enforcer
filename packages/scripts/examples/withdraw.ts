@@ -1,7 +1,7 @@
 import "dotenv/config"
-import { providers, Wallet } from 'ethers'
-import { assembleWithdraw, claimFunds, getClaimStatus } from "../src/withdraw"
-import { forceInclude, isForceIncludePossible, sendWithDelayedInbox } from "../src/delayed-inbox"
+import { BigNumber, providers, Wallet } from 'ethers'
+import { ArbitrumDelayedInbox } from "../src/lib/delayed-inbox"
+import { ArbitrumBridge } from "../src/lib/bridge"
 
 if (!process.env.DEVNET_PRIVKEY) {
     throw new Error('DEVNET_PRIVKEY env variable is required')
@@ -21,9 +21,16 @@ const l2Wallet = new Wallet(walletPrivateKey, l2Provider)
 
 const amountInWei = 1
 
+const arbDelayedInbox = new ArbitrumDelayedInbox(421614)
+const arbBridge = new ArbitrumBridge(l1Provider, l2Provider)
+
 async function initiateWithdraw() {
-    const bridgeTx = await assembleWithdraw(l2Provider, l2Wallet.address, amountInWei)
-    return await sendWithDelayedInbox(bridgeTx, l1Wallet, l2Wallet)
+    const bridgeTx = await arbBridge.assembleWithdraw(l2Wallet.address, BigNumber.from(amountInWei))
+    
+    const signedTx = await arbDelayedInbox.signChildTransaction(l2Wallet, bridgeTx)
+    const delayedInboxTx = await arbDelayedInbox.sendChildTransaction(l1Wallet, signedTx)
+
+    return delayedInboxTx
 }
 
 // =========================================================================
