@@ -5,8 +5,7 @@ import TopBarLayout from "@/layouts/topbar";
 import { ArrowUpRightIcon, ChevronLeftIcon } from "lucide-react";
 import { shortenAddress } from "@/lib/shorten-address";
 import EthereumIcon from "@/assets/ethereum-icon.svg";
-import { formatEther, parseEther } from "viem";
-import { BigNumber } from "ethers";
+import { formatEther } from "viem";
 
 export default function ActivityScreen() {
   const [txHistory, setTxHistory] = useState<Transaction[]>([]);
