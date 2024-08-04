@@ -4,7 +4,6 @@ import StepOneIcon from "@/assets/step-one.svg";
 import StepThreeIcon from "@/assets/step-three.svg";
 import StepTwoIcon from "@/assets/step-two.svg";
 import useArbitrumBridge from "@/hooks/useArbitrumBridge";
-import TopBarLayout from "@/layouts/topbar";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import cn from "classnames";

@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "type-check": "tsc",
+    "build": "pnpm generate-routes && tsc && vite build",
+    "generate-routes": "tsr generate",
     "preview": "vite preview",
     "postinstall": "patch-package"
   },
@@ -28,6 +30,7 @@
     "wagmi": "2.10.10"
   },
   "devDependencies": {
+    "@tanstack/router-cli": "1.45.13",
     "@types/react": "18.2.66",
     "@types/react-dom": "18.2.22",
     "@vitejs/plugin-react-swc": "3.5.0",
