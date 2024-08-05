@@ -8,7 +8,7 @@ export default function Topbar() {
       <div className="flex justify-between items-center | w-full">
         <div className="flex items-center gap-3">
           <img src={ArbitrumConnectIcon} width={32} height={32} />
-          <span className="text-2xl">
+          <span className="text-2xl hidden md:block">
             <b>Arbitrum</b> Connect
           </span>
         </div>
