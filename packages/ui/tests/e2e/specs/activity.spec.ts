@@ -32,7 +32,7 @@ describe("/activity", () => {
         cy.visit("/activity")
         cy.contains("1 ETH").click()
 
-        //  assert
+        // assert
         cy.url().should("include", `/activity/${transactions[0].bridgeHash}`)
     })
 
