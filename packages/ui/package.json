@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "vite",
     "type-check": "tsc",
-    "build": "pnpm generate-routes && tsc && vite build",
-    "generate-routes": "tsr generate",
+    "build": "tsr generate && tsc && vite build",
     "preview": "vite preview",
     "postinstall": "patch-package"
   },
