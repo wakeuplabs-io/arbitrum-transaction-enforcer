@@ -19,7 +19,6 @@ describe("/withdraw", () => {
         
         cy.url().should("eq", Cypress.config().baseUrl)
     })
-
     
     it("should redirect to / if amount is not a valid value", () => {
         cy.visit(`/withdraw?amount="invalid"`)

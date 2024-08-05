@@ -49,10 +49,11 @@ Cypress.Commands.add('getLocalStorage', (key) => {
 
 Cypress.Commands.add('connectMetamask', function () {
     if (Cypress.env("skip_metamask") === true) {
-        this.skip(); // Skipping the test
+        return this.skip(); // Skipping the test
     }
 
-    cy.disconnectMetamaskWalletFromDapp()
+    // ensure we're disconnected, no harm if we're not connected other than a small warning
+    cy.disconnectMetamaskWalletFromDapp() 
 
     cy.get("#topbar-connect-wallet").click()
     cy.contains("MetaMask").click()
