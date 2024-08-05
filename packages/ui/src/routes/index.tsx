@@ -30,7 +30,7 @@ function HomeScreen() {
       return window.alert("Not enough balance");
     }
 
-    navigate({ to: "/withdraw", search: { amount: amount.toNumber() } });
+    navigate({ to: "/withdraw", search: { amount: amount.toString() } });
   }
 
   return (

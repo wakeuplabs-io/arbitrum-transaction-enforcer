@@ -12,7 +12,7 @@ import { formatEther } from "ethers/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 
 interface SearchParams {
-  amount: number;
+  amount: string;
 }
 
 export const Route = createFileRoute("/withdraw")({
@@ -20,9 +20,10 @@ export const Route = createFileRoute("/withdraw")({
   validateSearch: (search): SearchParams => {
     try {
       if (!search.amount) throw new Error("Amount is required");
-      return { amount: BigNumber.from(search.amount).toNumber() ?? 0 };
+      return { amount: BigNumber.from((search.amount as string).replace(/"/g, '')).toString() ?? "0" };
     } catch (e) {
-      return { amount: 0 };
+      console.log("e", e)
+      return { amount: "0" };
     }
   },
 });
@@ -33,6 +34,7 @@ function WithdrawScreen() {
 
   useEffect(() => {
     if (BigNumber.from(amountInWei).lte(0)) {
+      console.log("amountInWei", amountInWei);
       navigate({ to: "/" });
     }
   }, [amountInWei]);

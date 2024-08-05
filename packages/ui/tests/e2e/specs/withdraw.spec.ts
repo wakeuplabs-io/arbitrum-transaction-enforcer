@@ -6,6 +6,7 @@ describe("/withdraw", () => {
 
     beforeEach(() => {
       withdrawAmount = "1000000000000000000"
+      cy.clearAllLocalStorage()
     })
 
     it("should receive amount as a search param and display it in ether", () => {

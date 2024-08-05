@@ -65,7 +65,7 @@ Cypress.Commands.add('connectMetamask', function () {
 before(() => {
     if (!Cypress.env("skip_metamask")) {
         cy.addMetamaskNetwork({
-            networkName: 'Arbitrum sepolia',
+            networkName: 'arbitrum-sepolia',
             rpcUrl: 'https://arbitrum-sepolia.blockpi.network/v1/rpc/public',
             chainId: 421614,
             symbol: 'ETH',

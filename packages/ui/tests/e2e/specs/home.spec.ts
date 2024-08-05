@@ -58,7 +58,7 @@ describe("/", () => {
 
             const amount = params.get("amount")
             expect(amount).to.be.not.null
-            expect(amount).to.equal("100000000")
+            expect(String(amount).replace(/"/g, '')).to.equal("100000000")
         })
     })
 })
