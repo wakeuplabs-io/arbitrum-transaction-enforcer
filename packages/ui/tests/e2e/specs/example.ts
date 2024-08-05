@@ -8,7 +8,7 @@ describe('Metamask Extension tests', () => {
         cy.addMetamaskNetwork({
             networkName: 'Arbitrum sepolia',
             rpcUrl: 'https://arbitrum-sepolia.blockpi.network/v1/rpc/public',
-            chainId: '421614',
+            chainId: 421614,
             symbol: 'ETH',
             blockExplorer: 'https://goerli-optimism.etherscan.io/',
             isTestnet: true,
@@ -35,7 +35,7 @@ describe('Metamask Extension tests', () => {
         cy.get('#sendButton').click();
 
         // Confirm the Metamask transaction by clicking the "Confirm" button in the Metamask popup
-        cy.confirmMetamaskTransaction().should('be.true');
+        cy.confirmMetamaskTransaction({ gasConfig: {} }).should('be.true');
     });
 
     // Define the test case "confirm signature example"
