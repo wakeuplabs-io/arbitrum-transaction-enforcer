@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   Arbitrum Transaction Enforcer template
@@ -22,3 +22,6 @@ Outputs:
   CloudFrontDistributionId:
     Description: "CloudFront Distribution ID from the UI stack"
     Value: !GetAtt UI.Outputs.CloudFrontDistributionId
+  CloudFrontUrl:
+    Description: "CloudFront Domain Name from the UI stack"
+    Value: !GetAtt UI.Outputs.CloudFrontUrl
