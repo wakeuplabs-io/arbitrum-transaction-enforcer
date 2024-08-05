@@ -2,7 +2,7 @@ import ArbitrumIcon from "@/assets/arbitrum-icon.svg";
 import ArrowRightIcon from "@/assets/arrow-right.svg";
 import EthereumIcon from "@/assets/ethereum-icon.svg";
 import WalletIcon from "@/assets/wallet.svg";
-import CustomConnectButton from "@/components/styled/connectButton/customConnectButton";
+import CustomConnectButton from "@/components/connect-wallet";
 import useArbitrumBalance from "@/hooks/useArbitrumBalance";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -24,13 +24,13 @@ function HomeScreen() {
 
   function handleSubmit() {
     const amount = parseUnits(amountEth, 18);
-    if (amount.gt(parseUnits(arbBalance, 18))) {
-      return window.alert("Not enough balance");
-    } else if (amount.lte("0")) {
+    if (amount.lte("0")) {
       return window.alert("Only values greater than 0");
+    } else if (amount.gt(parseUnits(arbBalance, 18))) {
+      return window.alert("Not enough balance");
     }
 
-    navigate({ to: "/withdraw", search: { amount: amount.toString() } });
+    navigate({ to: "/withdraw", search: { amount: amount.toNumber() } });
   }
 
   return (
@@ -62,6 +62,7 @@ function HomeScreen() {
         <div className="flex flex-col grow justify-between items-center bg-neutral-50 border border-neutral-200 rounded-2xl p-4 pt-0 h-[21rem]">
           <div className="flex flex-col grow items-center justify-center">
             <input
+              id="amount-input"
               value={amountEth}
               onChange={(e) => setAmountEth(e.target.value)}
               placeholder="0"
@@ -76,7 +77,7 @@ function HomeScreen() {
               <div className="flex flex-col text-left">
                 <div className="font-bold text-xl">ETH</div>
                 <div className="text-neutral-500">
-                  Balance {arbBalance.slice(0, 10)}
+                  Balance <span id="balance">{arbBalance.slice(0, 10)}</span>
                 </div>
               </div>
             </div>
@@ -97,7 +98,9 @@ function HomeScreen() {
               <img src={WalletIcon} />
               <div>Address</div>
             </div>
-            <CustomConnectButton />
+            <CustomConnectButton className="btn btn-outline rounded-full btn-sm hover:text-gray-500">
+              ...
+            </CustomConnectButton>
           </div>
           {/* <div className="w-full flex justify-between items-center h-9">
             <div className="flex gap-3">
@@ -118,7 +121,7 @@ function HomeScreen() {
           </div> */}
         </div>
         <button
-          data-test-id="continue-btn"
+          id="continue-btn"
           onClick={(e) => {
             e.preventDefault();
             if (!address && openConnectModal) {

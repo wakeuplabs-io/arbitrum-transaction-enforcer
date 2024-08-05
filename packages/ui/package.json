@@ -10,7 +10,7 @@
     "generate-routes": "tsr generate",
     "preview": "vite preview",
     "postinstall": "patch-package",
-    "e2e:run": "synpress run --configFile synpress.config.js --spec ./tests/e2e/specs/home.ts --headless",
+    "e2e:run": "synpress run --configFile synpress.config.js",
     "e2e:open": "synpress open --configFile synpress.config.js"
   },
   "dependencies": {
@@ -39,7 +39,6 @@
     "@vitejs/plugin-react-swc": "3.5.0",
     "autoprefixer": "10.4.19",
     "cypress": "^13.13.2",
-    "cypress-terminal-report": "^6.1.2",
     "daisyui": "4.11.1",
     "patch-package": "^8.0.0",
     "postcss": "8.4.38",

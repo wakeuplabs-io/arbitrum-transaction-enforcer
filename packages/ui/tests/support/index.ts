@@ -1,6 +1,7 @@
-import "dotenv/config"
 import '@synthetixio/synpress/support/index';
 
+
+// commands
 declare global {
     namespace Cypress {
         interface Chainable {
@@ -20,6 +21,10 @@ declare global {
              * @param key 
              */
             getLocalStorage(key: string): Chainable<string | null>
+            /**
+             * Connect the metamask wallet to the dapp
+             */
+            connectMetamask(): Chainable<void>
         }
     }
 }
@@ -41,3 +46,31 @@ Cypress.Commands.add('getLocalStorage', (key) => {
         return window.localStorage.getItem(key);
     });
 });
+
+Cypress.Commands.add('connectMetamask', function () {
+    if (Cypress.env("skip_metamask") === true) {
+        this.skip(); // Skipping the test
+    }
+
+    cy.disconnectMetamaskWalletFromDapp()
+
+    cy.get("#topbar-connect-wallet").click()
+    cy.contains("MetaMask").click()
+    cy.acceptMetamaskAccess()
+})
+
+
+// hooks
+
+before(() => {
+    if (!Cypress.env("skip_metamask")) {
+        cy.addMetamaskNetwork({
+            networkName: 'Arbitrum sepolia',
+            rpcUrl: 'https://arbitrum-sepolia.blockpi.network/v1/rpc/public',
+            chainId: 421614,
+            symbol: 'ETH',
+            blockExplorer: 'https://sepolia.arbiscan.io/',
+            isTestnet: true,
+        })
+    }
+})

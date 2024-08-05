@@ -1,8 +1,8 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-export default function CustomConnectButton(props: React.ComponentProps<"button">) {
-  // TODO: cleanup this component
-
+export default function CustomConnectButton(
+  props: React.ComponentProps<"button">
+) {
   return (
     <ConnectButton.Custom>
       {({
@@ -38,7 +38,7 @@ export default function CustomConnectButton(props: React.ComponentProps<"button"
               if (!connected) {
                 return (
                   <button onClick={openConnectModal} type="button" {...props}>
-                    Connect Wallet
+                    {props.children ?? "Connect Wallet"}
                   </button>
                 );
               }

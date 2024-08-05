@@ -1,4 +1,3 @@
-import "dotenv/config"
 import { defineConfig } from 'cypress'
 import synpressPlugins from '@synthetixio/synpress/plugins';
 
@@ -8,7 +7,7 @@ export default defineConfig({
             skip_metamask: process.env.SKIP_METAMASK_SETUP === "true"
         },
         baseUrl: 'http://localhost:3000/',
-        specPattern: 'tests/e2e/specs/**/*.ts',
+        specPattern: 'tests/e2e/specs',
         supportFile: 'tests/support/index.ts',
         video: false,
         screenshotOnRunFailure: false,

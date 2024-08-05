@@ -30,9 +30,6 @@ describe("/activity", () => {
         // prepare
         cy.setLocalStorage("transactions", JSON.stringify(transactions))
         cy.visit("/activity")
-
-
-        // act
         cy.contains("1 ETH").click()
 
         //  assert

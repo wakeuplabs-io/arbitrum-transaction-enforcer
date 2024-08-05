@@ -12,7 +12,7 @@ import { formatEther } from "ethers/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 
 interface SearchParams {
-  amount: string;
+  amount: number;
 }
 
 export const Route = createFileRoute("/withdraw")({
@@ -20,9 +20,9 @@ export const Route = createFileRoute("/withdraw")({
   validateSearch: (search): SearchParams => {
     try {
       if (!search.amount) throw new Error("Amount is required");
-      return { amount: BigNumber.from(search.amount).toString() ?? "0" };
+      return { amount: BigNumber.from(search.amount).toNumber() ?? 0 };
     } catch (e) {
-      return { amount: "0" };
+      return { amount: 0 };
     }
   },
 });
@@ -47,12 +47,12 @@ function WithdrawScreen() {
 
   function onContinue() {
     setLoading(true);
-    initiateWithdraw(amountInWei!)
+    initiateWithdraw(String(amountInWei))
       .then((x) => {
         const tx: Transaction = {
           bridgeHash: x.l2Txhash,
           delayedInboxHash: x.l1Txhash,
-          amount: amountInWei as string,
+          amount: String(amountInWei),
           timestamp: Date.now(),
         };
         transactionsStorageService.create(tx);
