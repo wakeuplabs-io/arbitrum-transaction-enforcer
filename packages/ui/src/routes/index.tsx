@@ -40,20 +40,26 @@ function HomeScreen() {
           <div className="flex flex-row gap-3 items-start">
             <img src={ArbitrumIcon} />
             <div>
-              <div className="text-sm text-neutral-500">From</div>
-              <div className="font-semibold text-2xl">Arbitrum</div>
+              <div className="md:text-sm text-xs text-neutral-500">From</div>
+              <div className="font-semibold text-2xl hidden md:block">
+                Arbitrum
+              </div>
+              <div className="font-semibold text-xl md:hidden">ARB</div>
             </div>
           </div>
           <img src={ArrowRightIcon} />
           <div className="flex flex-row gap-3 items-start">
             <img src={EthereumIcon} />
             <div>
-              <div className="text-sm text-neutral-500">To</div>
-              <div className="font-semibold text-2xl">Ethereum</div>
+              <div className="text-xs md:text-sm text-neutral-500">To</div>
+              <div className="font-semibold text-2xl hidden md:block">
+                Ethereum
+              </div>
+              <div className="font-semibold text-xl md:hidden">ETH</div>
             </div>
           </div>
         </div>
-        <div className="flex flex-col grow justify-between items-center bg-neutral-50 border border-neutral-200 rounded-2xl p-5 pt-0 h-[21rem]">
+        <div className="flex flex-col grow justify-between items-center bg-neutral-50 border border-neutral-200 rounded-2xl p-4 pt-0 h-[21rem]">
           <div className="flex flex-col grow items-center justify-center">
             <input
               value={amountEth}
@@ -75,7 +81,9 @@ function HomeScreen() {
               <img src={EthereumIcon} />
               <div className="flex flex-col text-left">
                 <div className="font-bold text-xl">ETH</div>
-                <div className="text-neutral-500">Balance {arbBalance}</div>
+                <div className="text-neutral-500">
+                  Balance {arbBalance.slice(0, 10)}
+                </div>
               </div>
             </div>
             <div className="flex flex-row items-center gap-5">
@@ -137,8 +145,8 @@ function HomeScreen() {
         >
           {address
             ? arbBalance
-              ? "Loading balance..."
-              : "Continue"
+              ? "Continue"
+              : "Loading balance..."
             : "Connect your wallet to withdraw"}
         </button>
       </div>

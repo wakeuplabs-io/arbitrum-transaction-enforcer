@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { Transaction, transactionsStorageService } from "@/lib/transactions";
-import { ChevronLeftIcon } from "lucide-react";
 import { shortenAddress } from "@/lib/shorten-address";
+import { Transaction, transactionsStorageService } from "@/lib/transactions";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ChevronLeftIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/activity/")({
   component: ActivityScreen,
