@@ -9,7 +9,9 @@
     "build": "pnpm generate-routes && tsc && vite build",
     "generate-routes": "tsr generate",
     "preview": "vite preview",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "e2e:test": "synpress run --configFile synpress.config.js",
+    "e2e:open": "synpress open --configFile synpress.config.js"
   },
   "dependencies": {
     "@arbitrum/sdk": "4.0.0",
@@ -30,11 +32,13 @@
     "wagmi": "2.10.10"
   },
   "devDependencies": {
+    "@synthetixio/synpress": "^3.7.3",
     "@tanstack/router-cli": "1.45.13",
     "@types/react": "18.2.66",
     "@types/react-dom": "18.2.22",
     "@vitejs/plugin-react-swc": "3.5.0",
     "autoprefixer": "10.4.19",
+    "cypress": "^13.13.2",
     "daisyui": "4.11.1",
     "patch-package": "^8.0.0",
     "postcss": "8.4.38",
