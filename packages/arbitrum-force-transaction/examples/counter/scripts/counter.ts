@@ -1,6 +1,6 @@
 import "dotenv/config"
 import { ethers, providers, Wallet } from "ethers";
-import { ArbitrumDelayedInbox } from "../src/lib/delayed-inbox";
+import { ArbitrumDelayedInbox } from "../../../../src/lib/delayed-inbox";
 
 const walletPrivateKey = process.env.DEVNET_PRIVKEY as string
 
