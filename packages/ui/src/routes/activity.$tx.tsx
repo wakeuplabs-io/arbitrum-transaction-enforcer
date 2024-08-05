@@ -22,16 +22,12 @@ export const Route = createFileRoute("/activity/$tx")({
     if (!tx) throw notFound();
     return tx;
   },
-  errorComponent: PostErrorComponent as any,
+  errorComponent: ErrorComponent,
   notFoundComponent: () => {
-    return <p>Post not found</p>;
+    return <p>Transaction not found</p>;
   },
   component: PostComponent,
 });
-
-export function PostErrorComponent({ error }: ErrorComponentProps) {
-  return <ErrorComponent error={error} />;
-}
 
 function PostComponent() {
   const transaction = Route.useLoaderData();

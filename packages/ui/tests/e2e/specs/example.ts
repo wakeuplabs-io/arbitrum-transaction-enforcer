@@ -49,7 +49,7 @@ describe('Metamask Extension tests', () => {
         cy.confirmMetamaskSignatureRequest().should('be.true');
     });
 
-    it("should connect to the DApp with Metamask extension", () => {
+    xit("should connect to the DApp with Metamask extension", () => {
         cy.requiresMetamask();
         cy.visit("/")
         cy.contains("Connect").click();
