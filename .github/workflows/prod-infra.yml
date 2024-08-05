@@ -1,4 +1,4 @@
-name: Infra
+name: prod-infra
 
 on:
   push:

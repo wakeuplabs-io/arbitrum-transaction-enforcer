@@ -1,4 +1,4 @@
-name: Staging-Infra
+name: staging-infra
 
 on:
   push:
