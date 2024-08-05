@@ -1,6 +1,6 @@
 import ArbitrumConnectIcon from "@/assets/arbitrum-connect.svg";
 import CustomConnectButton from "@/components/styled/connectButton/customConnectButton";
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 
 export default function Topbar() {
   return (
