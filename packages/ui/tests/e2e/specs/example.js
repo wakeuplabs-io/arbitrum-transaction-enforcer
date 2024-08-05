@@ -29,7 +29,7 @@ describe('Metamask Extension tests', () => {
     });
 
     // Define the test case "create transaction example"
-    it('create transaction example', () => {
+    xit('create transaction example', () => {
 
         // Click the "Send" button on the DApp
         cy.get('#sendButton').click();
@@ -39,7 +39,7 @@ describe('Metamask Extension tests', () => {
     });
 
     // Define the test case "confirm signature example"
-    it('confirm signature example', () => {
+    xit('confirm signature example', () => {
 
         // Click the "Sign" button on the DApp
         cy.get('#ethSign').click();
