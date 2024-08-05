@@ -1,9 +1,12 @@
-name: Deploy
+name: staging-ui
 
 on:
   push:
     branches:
-      - main
+      - develop
+    paths-ignore:
+      - "**/template.yml"
+      - "**/template.yaml"
 
 jobs:
   Deploy:
@@ -21,7 +24,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build all
+      - name: Build
+        working-directory: ./packages/ui
         run: pnpm build
 
       - name: Configure AWS credentials
@@ -31,18 +35,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: sa-east-1
 
-      - name: SAM Build
-        run: sam build
-
-      - name: SAM Deploy
-        run: sam deploy --stack-name ${{ vars.STACK_NAME }} --parameter-overrides StackName='${{ vars.STACK_NAME }}' DomainName='${{vars.UI_DOMAIN}}'
-
       - name: Deploy UI to s3
         working-directory: ./packages/ui
         run: |
-          aws s3 sync dist s3://${{ vars.STACK_NAME }}.${{vars.UI_DOMAIN}}/
+          aws s3 sync dist s3://staging-${{ vars.STACK_NAME }}.${{vars.UI_DOMAIN}}/ --delete
 
       - name: Invalidate UI Cloudfront Distribution
         run: |
-          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name ${{ vars.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name staging-${{ vars.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)
           aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"

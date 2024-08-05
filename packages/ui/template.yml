@@ -114,7 +114,7 @@ Resources:
               - GET
             Compress: true
             CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad #CacheDisabledPolicy
-            ResponseHeadersPolicyId: !Ref SecurityHeadersPolicy #Comentar si la seguridad en index.html rompe
+            ResponseHeadersPolicyId: !Ref SecurityHeadersPolicy
           - PathPattern: /static/js/*.js
             TargetOriginId: !Sub "${StackName}S3Origin"
             ViewerProtocolPolicy: redirect-to-https
@@ -134,3 +134,6 @@ Outputs:
   CloudFrontDistributionId:
     Description: "CloudFront Distribution ID"
     Value: !Ref CloudFrontDistribution
+  CloudFrontUrl:
+    Description: "CloudFront Distribution Url"
+    Value: !GetAtt CloudFrontDistribution.DomainName

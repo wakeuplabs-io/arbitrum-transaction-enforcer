@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
-import { Transaction, transactionsStorageService } from "@/lib/transactions";
-import { ArrowUpRightIcon, ChevronLeftIcon } from "lucide-react";
-import EthereumIcon from "@/assets/ethereum-icon.svg";
-import { formatEther } from "viem";
 import { shortenAddress } from "@/lib/shorten-address";
+import { Transaction, transactionsStorageService } from "@/lib/transactions";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ChevronLeftIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/activity/")({
   component: ActivityScreen,
@@ -23,32 +21,18 @@ function ActivityScreen() {
         <Link to="/">
           <ChevronLeftIcon className="h-5 w-5" />
         </Link>
-        <h1 className="flex text-xl font-semibold">My activity</h1>
+        <h1 className="flex text-xl font-semibold">My activity ABC</h1>
       </div>
 
       <div className="flex">
-        <ul className="border w-full rounded-2xl">
+        <ul>
           {txHistory.map((x) => (
-            <Link to={`/activity/${x.bridgeHash}`}>
-              <li
-                key={x.bridgeHash}
-                className="flex space-x-5 py-5 px-5 rounded-2xl hover:bg-gray-50"
-              >
-                <img src={EthereumIcon} />
-                <div className="flex justify-between w-full items-center">
-                  <div>
-                    <span className="block">Withdrawal</span>
-                    <span className="block">
-                      {shortenAddress(x.bridgeHash)}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span>{`${formatEther(BigInt(x.amount))}`} ETH</span>
-                    <ArrowUpRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
-              </li>
-            </Link>
+            <li key={x.bridgeHash} className="list-disc ml-4">
+              {shortenAddress(x.bridgeHash)}{" "}
+              <Link className="link" to={`/activity/${x.bridgeHash}`}>
+                View detail
+              </Link>
+            </li>
           ))}
         </ul>
 

@@ -29,6 +29,7 @@
     "react-dom": "18.2.0",
     "react-hook-form": "7.52.1",
     "viem": "2.17.3",
+    "vite-plugin-checker": "0.7.2",
     "wagmi": "2.10.10"
   },
   "devDependencies": {

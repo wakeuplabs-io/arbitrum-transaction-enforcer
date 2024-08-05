@@ -1,5 +1,3 @@
-import "@rainbow-me/rainbowkit/styles.css";
-import { arbitrum, arbitrumSepolia, mainnet, sepolia } from "wagmi/chains";
 import {
   ChildToParentMessageStatus,
   ChildTransactionReceipt,
@@ -8,12 +6,14 @@ import {
 } from "@arbitrum/sdk";
 import { ArbSys__factory } from "@arbitrum/sdk/dist/lib/abi/factories/ArbSys__factory";
 import { ARB_SYS_ADDRESS } from "@arbitrum/sdk/dist/lib/dataEntities/constants";
+import "@rainbow-me/rainbowkit/styles.css";
 import { ethers } from "ethers";
 import { useAccount, useSwitchChain } from "wagmi";
-import { useEthersSigner } from "./useEthersSigner";
+import { arbitrum, arbitrumSepolia, mainnet, sepolia } from "wagmi/chains";
 import { useEthersProvider } from "./useEthersProvider";
+import { useEthersSigner } from "./useEthersSigner";
 
-enum ClaimStatus {
+export enum ClaimStatus {
   PENDING = "PENDING",
   CLAIMABLE = "CLAIMABLE",
   CLAIMED = "CLAIMED",
@@ -27,10 +27,10 @@ const l2Networks = {
 export default function useArbitrumBridge() {
   const parentChainId = sepolia.id;
   const childNetworkId = l2Networks[parentChainId];
-  const {  switchChainAsync } = useSwitchChain();
+  const { switchChainAsync } = useSwitchChain();
   const { address } = useAccount();
-  const signer = useEthersSigner();
-  const provider = useEthersProvider();
+  const signer = useEthersSigner({ chainId: parentChainId });
+  const provider = useEthersProvider({ chainId: childNetworkId });
 
   async function ensureChainId(chainId: number) {
     await switchChainAsync({ chainId });
@@ -43,16 +43,6 @@ export default function useArbitrumBridge() {
 
     if (!signer) throw new Error("No signer");
     return signer;
-  }
-
-  async function getProvider(
-    chainId: number
-  ): Promise<ethers.providers.JsonRpcProvider> {
-    // TODO: let's use custom providers
-    await ensureChainId(chainId);
-
-    if (!provider) throw new Error("No provider");
-    return provider;
   }
 
   async function sendWithDelayedInbox(tx: any) {
@@ -75,18 +65,18 @@ export default function useArbitrumBridge() {
     return { l2Txhash, l1Txhash: inboxRec.transactionHash };
   }
 
-  async function isForceIncludePossible() {
-    const l1Wallet = await getSigner(parentChainId);
+  async function isForceIncludePossible(parentSigner: ethers.providers.JsonRpcSigner) {
+    await ensureChainId(parentChainId);
     const l2Network = getArbitrumNetwork(childNetworkId);
-    const inboxSdk = new InboxTools(l1Wallet, l2Network);
+    const inboxSdk = new InboxTools(parentSigner, l2Network);
 
     return !!(await inboxSdk.getForceIncludableEvent());
   }
 
-  async function forceInclude() {
-    const l1Wallet = await getSigner(parentChainId);
+  async function forceInclude(parentSigner: ethers.providers.JsonRpcSigner) {
+    await ensureChainId(parentChainId);
     const l2Network = getArbitrumNetwork(childNetworkId);
-    const inboxTools = new InboxTools(l1Wallet, l2Network);
+    const inboxTools = new InboxTools(parentSigner, l2Network);
 
     if (!(await inboxTools.getForceIncludableEvent())) {
       throw new Error("Force inclusion is not possible");
@@ -121,7 +111,7 @@ export default function useArbitrumBridge() {
     );
   }
 
-  async function getClaimStatus(l2TxnHash: string): Promise<ClaimStatus> {
+  async function getClaimStatus(l2TxnHash: string, childProvider: ethers.providers.JsonRpcProvider, parentSigner: ethers.providers.JsonRpcSigner): Promise<ClaimStatus> {
     if (!l2TxnHash) {
       throw new Error(
         "Provide a transaction hash of an L2 transaction that sends an L2 to L1 message"
@@ -131,10 +121,8 @@ export default function useArbitrumBridge() {
       throw new Error(`Hmm, ${l2TxnHash} doesn't look like a txn hash...`);
     }
 
-    const l2Provider = await getProvider(childNetworkId);
-
     // First, let's find the Arbitrum txn from the txn hash provided
-    const receipt = await l2Provider.getTransactionReceipt(l2TxnHash);
+    const receipt = await childProvider.getTransactionReceipt(l2TxnHash);
     if (receipt === null) {
       return ClaimStatus.PENDING;
     }
@@ -142,20 +130,19 @@ export default function useArbitrumBridge() {
 
     // In principle, a single transaction could trigger any number of outgoing messages; the common case will be there's only one.
     // We assume there's only one / just grad the first one.
-    const l1Wallet = await getSigner(parentChainId);
-    const messages = await l2Receipt.getChildToParentMessages(l1Wallet);
+    const messages = await l2Receipt.getChildToParentMessages(parentSigner);
     const l2ToL1Msg = messages[0];
-
+    console.log("l2ToL1Msg: ", l2ToL1Msg)
     // Check if already executed
     if (
-      (await l2ToL1Msg.status(l2Provider)) ==
+      (await l2ToL1Msg.status(childProvider)) ==
       ChildToParentMessageStatus.EXECUTED
     ) {
       return ClaimStatus.CLAIMED;
     }
 
     // block number of the first block where the message can be executed or null if it already can be executed or has been executed
-    const block = await l2ToL1Msg.getFirstExecutableBlock(l2Provider);
+    const block = await l2ToL1Msg.getFirstExecutableBlock(childProvider);
     if (block === null) {
       return ClaimStatus.CLAIMABLE;
     } else {
@@ -163,7 +150,7 @@ export default function useArbitrumBridge() {
     }
   }
 
-  async function claimFunds(l2TxnHash: string) {
+  async function claimFunds(l2TxnHash: string, childProvider: ethers.providers.JsonRpcProvider, parentSigner: ethers.providers.JsonRpcSigner) {
     if (!l2TxnHash) {
       throw new Error(
         "Provide a transaction hash of an L2 transaction that sends an L2 to L1 message"
@@ -174,26 +161,24 @@ export default function useArbitrumBridge() {
     }
 
     // First, let's find the Arbitrum txn from the txn hash provided
-    const l2Provider = await getProvider(childNetworkId);
-    const receipt = await l2Provider.getTransactionReceipt(l2TxnHash);
+    const receipt = await childProvider.getTransactionReceipt(l2TxnHash);
     const l2Receipt = new ChildTransactionReceipt(receipt);
 
     // In principle, a single transaction could trigger any number of outgoing messages; the common case will be there's only one.
     // We assume there's only one / just grad the first one.
-    const l1Wallet = await getSigner(parentChainId);
-    const messages = await l2Receipt.getChildToParentMessages(l1Wallet);
+    const messages = await l2Receipt.getChildToParentMessages(parentSigner);
     const l2ToL1Msg = messages[0];
 
     // Check if already executed
     if (
-      (await l2ToL1Msg.status(l2Provider)) ==
+      (await l2ToL1Msg.status(childProvider)) ==
       ChildToParentMessageStatus.EXECUTED
     ) {
       return null;
     }
 
     // Now that its confirmed and not executed, we can execute our message in its outbox entry.
-    const res = await l2ToL1Msg.execute(l2Provider);
+    const res = await l2ToL1Msg.execute(childProvider);
     const rec = await res.wait();
 
     console.log("Done! Your transaction is executed", rec);
@@ -206,5 +191,7 @@ export default function useArbitrumBridge() {
     initiateWithdraw,
     getClaimStatus,
     claimFunds,
+    provider,
+    signer
   };
 }
