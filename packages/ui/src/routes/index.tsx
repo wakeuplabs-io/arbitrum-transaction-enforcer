@@ -30,7 +30,7 @@ function HomeScreen() {
       return window.alert("Only values greater than 0");
     }
 
-    navigate({ to: "/review", search: { amount: amount.toString() } });
+    navigate({ to: "/withdraw", search: { amount: amount.toString() } });
   }
 
   return (
@@ -68,12 +68,6 @@ function HomeScreen() {
               type="number"
               className="bg-neutral-50 text-center text-7xl w-full outline-none remove-arrow font-semibold"
             />
-            {/* <div className="flex gap-1 ml-4 text-neutral-400">
-              <div className="text-base">
-                ~ {toUSD(currentAmount)} USD
-              </div>
-              <img src={ArrowSwapIcon} />
-            </div> */}
           </div>
           <hr className="w-full pb-6" />
           <div className="flex justify-between items-center w-full">
@@ -103,14 +97,7 @@ function HomeScreen() {
               <img src={WalletIcon} />
               <div>Address</div>
             </div>
-            <CustomConnectButton
-              variant="outlined"
-              size="small"
-              accountStatus={"address"}
-              showBalance={false}
-              chainStatus={"none"}
-              label="..."
-            />
+            <CustomConnectButton />
           </div>
           {/* <div className="w-full flex justify-between items-center h-9">
             <div className="flex gap-3">
@@ -131,6 +118,7 @@ function HomeScreen() {
           </div> */}
         </div>
         <button
+          data-test-id="continue-btn"
           onClick={(e) => {
             e.preventDefault();
             if (!address && openConnectModal) {

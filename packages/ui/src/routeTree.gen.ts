@@ -11,15 +11,15 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as ReviewImport } from './routes/review'
+import { Route as WithdrawImport } from './routes/withdraw'
 import { Route as IndexImport } from './routes/index'
 import { Route as ActivityIndexImport } from './routes/activity.index'
 import { Route as ActivityTxImport } from './routes/activity.$tx'
 
 // Create/Update Routes
 
-const ReviewRoute = ReviewImport.update({
-  path: '/review',
+const WithdrawRoute = WithdrawImport.update({
+  path: '/withdraw',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -49,11 +49,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/review': {
-      id: '/review'
-      path: '/review'
-      fullPath: '/review'
-      preLoaderRoute: typeof ReviewImport
+    '/withdraw': {
+      id: '/withdraw'
+      path: '/withdraw'
+      fullPath: '/withdraw'
+      preLoaderRoute: typeof WithdrawImport
       parentRoute: typeof rootRoute
     }
     '/activity/$tx': {
@@ -77,7 +77,7 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexRoute,
-  ReviewRoute,
+  WithdrawRoute,
   ActivityTxRoute,
   ActivityIndexRoute,
 })
@@ -91,7 +91,7 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/review",
+        "/withdraw",
         "/activity/$tx",
         "/activity/"
       ]
@@ -99,8 +99,8 @@ export const routeTree = rootRoute.addChildren({
     "/": {
       "filePath": "index.tsx"
     },
-    "/review": {
-      "filePath": "review.tsx"
+    "/withdraw": {
+      "filePath": "withdraw.tsx"
     },
     "/activity/$tx": {
       "filePath": "activity.$tx.tsx"

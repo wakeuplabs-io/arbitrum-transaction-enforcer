@@ -16,7 +16,7 @@ export default function Topbar() {
           <Link to="/activity" className="btn btn-outline rounded-2xl hover:border-gray-300 hover:text-gray-500">
             My activity
           </Link>
-          <CustomConnectButton border="square" />
+          <CustomConnectButton id="topbar-connect-wallet" />
         </div>
       </div>
     </header>

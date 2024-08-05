@@ -1,21 +1,6 @@
-import WalletNegativeIcon from "@/assets/wallet-negative.svg";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import cn from "classnames";
-import { ConnectButtonProps } from "node_modules/@rainbow-me/rainbowkit/dist/components/ConnectButton/ConnectButton";
-import React from "react";
 
-interface IConnectButtonProps extends ConnectButtonProps {
-  variant?: "contained" | "outlined";
-  size?: "small" | "medium";
-  border?: "rounded" | "square";
-}
-
-export default function CustomConnectButton({
-  label,
-  variant = "contained",
-  size = "medium",
-  border = "rounded",
-}: IConnectButtonProps) {
+export default function CustomConnectButton(props: React.ComponentProps<"button">) {
   // TODO: cleanup this component
 
   return (
@@ -26,40 +11,18 @@ export default function CustomConnectButton({
         openAccountModal,
         openChainModal,
         openConnectModal,
+        authenticationStatus,
         mounted,
       }) => {
-        const ready = mounted;
-        const connected = ready && account && chain;
-        const BaseButton = ({
-          children,
-          onClick,
-        }: {
-          children: React.ReactNode;
-          onClick: React.MouseEventHandler<HTMLButtonElement>;
-        }) => {
-          return (
-            <button
-              type="button"
-              className={cn("btn btn-primary text-neutral-100 font-normal", {
-                "btn-outline": variant === "outlined",
-                "px-6 btn-sm h-9": size === "small",
-                "px-7 btn": size === "medium",
-                "rounded-2xl": border === "square",
-                "rounded-3xl": border === "rounded",
-              })}
-              onClick={onClick}
-            >
-              {children}
-            </button>
-          );
-        };
-        const ConnectButton = ({
-          children,
-          onClick,
-        }: {
-          children: React.ReactNode;
-          onClick: React.MouseEventHandler<HTMLButtonElement>;
-        }) => <BaseButton onClick={onClick}>{children}</BaseButton>;
+        // Note: If your app doesn't use authentication, you
+        // can remove all 'authenticationStatus' checks
+        const ready = mounted && authenticationStatus !== "loading";
+        const connected =
+          ready &&
+          account &&
+          chain &&
+          (!authenticationStatus || authenticationStatus === "authenticated");
+
         return (
           <div
             {...(!ready && {
@@ -74,31 +37,24 @@ export default function CustomConnectButton({
             {(() => {
               if (!connected) {
                 return (
-                  <ConnectButton onClick={openConnectModal}>
-                    {label ? (
-                      label
-                    ) : (
-                      <div className="flex flex-row gap-3 items-center px-10">
-                        <img src={WalletNegativeIcon} />
-                        <div>Connect</div>
-                      </div>
-                    )}
-                  </ConnectButton>
+                  <button onClick={openConnectModal} type="button" {...props}>
+                    Connect Wallet
+                  </button>
                 );
               }
+
               if (chain.unsupported) {
                 return (
-                  <BaseButton onClick={openChainModal}>
+                  <button onClick={openChainModal} type="button" {...props}>
                     Wrong network
-                  </BaseButton>
+                  </button>
                 );
               }
+
               return (
-                <div className="flex">
-                  <BaseButton onClick={openAccountModal}>
-                    {account.displayName}
-                  </BaseButton>
-                </div>
+                <button onClick={openAccountModal} type="button" {...props}>
+                  {account.displayName}
+                </button>
               );
             })()}
           </div>
