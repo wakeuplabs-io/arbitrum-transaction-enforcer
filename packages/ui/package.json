@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "type-check": "tsc",
+    "build": "tsr generate && tsc && vite build",
     "preview": "vite preview",
     "postinstall": "patch-package"
   },
@@ -15,6 +16,8 @@
     "@rainbow-me/rainbowkit": "2.1.3",
     "@tanstack/react-query": "5.51.1",
     "@tanstack/react-router": "1.45.0",
+    "@tanstack/router-devtools": "^1.46.2",
+    "@tanstack/router-plugin": "^1.45.13",
     "@wagmi/cli": "2.1.15",
     "classnames": "2.5.1",
     "ethers": "5.7.2",
@@ -22,11 +25,12 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "7.52.1",
-    "react-router-dom": "^6.25.1",
     "viem": "2.17.3",
+    "vite-plugin-checker": "0.7.2",
     "wagmi": "2.10.10"
   },
   "devDependencies": {
+    "@tanstack/router-cli": "1.45.13",
     "@types/react": "18.2.66",
     "@types/react-dom": "18.2.22",
     "@vitejs/plugin-react-swc": "3.5.0",

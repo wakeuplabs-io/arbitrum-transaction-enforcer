@@ -16,6 +16,8 @@ export default function CustomConnectButton({
   size = "medium",
   border = "rounded",
 }: IConnectButtonProps) {
+  // TODO: cleanup this component
+
   return (
     <ConnectButton.Custom>
       {({
