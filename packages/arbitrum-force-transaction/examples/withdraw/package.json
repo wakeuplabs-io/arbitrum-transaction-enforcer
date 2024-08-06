@@ -1,5 +1,5 @@
 {
-  "name": "counter",
+  "name": "withdraw",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,8 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "arbitrum-force-transaction": "file:../..",
-    "dotenv": "^16.4.5",
-    "ethers": "^5.7.2"
+    "arbitrum-force-transaction": "file:../.."
   }
 }

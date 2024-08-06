@@ -39,18 +39,45 @@ describe("Arbitrum delayed inbox", () => {
                 to: fromAddress,
                 value: BigNumber.from("1")
             })
+            console.log("assembledChildTx", assembledChildTx)
 
             expect(assembledChildTx).toBeDefined()
             expect(assembledChildTx.chainId).toBe(l2ChainId)
+            expect(assembledChildTx.from).toBe(fromAddress)
+            // TODO: add expectations
         })
     })
 
     describe("signChildTransaction", () => {
-        xit("signChildTransaction should take a random tx and prepare it for sending through delayedInbox", () => { })
+        it("signChildTransaction should take a random tx and prepare it for sending through delayedInbox including signing it", async () => {
+            const signedTx = await delayedInbox.signChildTransaction(l2Signer, {
+                to: fromAddress,
+                value: BigNumber.from("1")
+            })
+
+            expect(signedTx).toBeDefined()
+            expect(typeof signedTx).toBe("string")
+            // TODO: add expectations
+        })
     })
 
     describe("sendChildTransaction", () => {
-        xit("", () => { })
+        it("sendChildTransaction should take a random tx, prepare it and send it in L2", async () => {
+            const txHash = await delayedInbox.sendChildTransaction(l2Signer, {
+                to: fromAddress,
+                value: BigNumber.from("1")
+            })
+
+            expect(txHash).toBeDefined()
+            expect(typeof txHash).toBe("string")
+
+            await l2Provider.waitForTransaction(txHash)
+            const tx = await l2Provider.getTransaction(txHash)
+
+            expect(tx).not.toBeNull()
+            expect(tx.to).toBe(fromAddress)
+            // TODO: add expectations
+        })
     })
 
     describe("sendChildTransactionToParent", () => {

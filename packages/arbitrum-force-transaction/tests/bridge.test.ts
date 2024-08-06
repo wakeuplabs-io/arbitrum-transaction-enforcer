@@ -18,12 +18,6 @@ describe("bridge", () => {
         bridge = new ArbitrumBridge(l1Provider, l2Provider)
         fromAddress = config.FROM_ADDRESS
         fromPrivateKey = config.FROM_PRIVATE_KEY
-
-        // reset forks
-        await resetHardhatForkAll()
-
-        // extend timeout for txs
-        jest.setTimeout(10000)
     })
 
     describe("assembleWithdrawal", () => {
@@ -47,14 +41,23 @@ describe("bridge", () => {
             expect(canWithdraw).toBe(ClaimStatus.CLAIMED)
         })
 
+        
         xit("getClaimStatus should return CLAIMABLE if funds can be claimed", async () => {
+            // TODO: figure out how to get a claimable tx here
         })
 
         xit("getClaimStatus should return PENDING if funds can't be claimed", async () => {
+            // TODO: figure out how to get a claimable tx here
         })
     })
 
     describe("claim", () => {
-        xit("claim should create and send l1 tx to claim the funds after the bridge", () => { })
+        beforeEach(() => {
+            
+        })
+
+        xit("claim should create and send l1 tx to claim the funds after the bridge", () => {
+            // TODO: take 
+         })
     })
 })

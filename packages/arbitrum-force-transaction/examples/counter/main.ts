@@ -1,13 +1,13 @@
 import "dotenv/config"
-import { ethers, providers, Wallet } from "ethers";
-import { ArbitrumDelayedInbox } from "../../../../src/lib/delayed-inbox";
+import { ethers, Wallet } from "ethers";
+import { ArbitrumDelayedInbox } from "arbitrum-force-transaction";
 
 const walletPrivateKey = process.env.DEVNET_PRIVKEY as string
 
-const l1Provider = new providers.JsonRpcProvider(process.env.L1RPC)
-const l2Provider = new providers.JsonRpcProvider(process.env.L2RPC)
+const l1Provider = new ethers.providers.JsonRpcProvider(process.env.L1RPC)
+const l2Provider = new ethers.providers.JsonRpcProvider(process.env.L2RPC)
 
-const l1Wallet = new Wallet(walletPrivateKey, l1Provider)
+const l1Wallet = new Wallet( walletPrivateKey, l1Provider)
 const l2Wallet = new Wallet(walletPrivateKey, l2Provider)
 
 const arbDelayedInbox = new ArbitrumDelayedInbox(421614)
@@ -28,12 +28,10 @@ async function incrementCount() {
 async function incrementCountWithDelayed() {
     const contract = new ethers.utils.Interface(["function increment() public"]);
    
-    console.log("bef")
     const l2SignedTx = await arbDelayedInbox.signChildTransaction(l2Wallet, {
         to: l2CounterContractAddress,
         data: await contract.encodeFunctionData("increment"),
     })
-    console.log("l2SignedTx", l2SignedTx)
     const l1DelayedInboxTx = await arbDelayedInbox.sendChildTransaction(l1Wallet, l2SignedTx);
 
     return l1DelayedInboxTx;

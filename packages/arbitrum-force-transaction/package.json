@@ -2,8 +2,10 @@
   "name": "arbitrum-force-transaction",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
     "test": "jest ./tests --runInBand",
     "postinstall": "patch-package",
     "start:eth": "hardhat node --port 4000 --config hardhat-eth.config.js",
