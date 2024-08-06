@@ -26,7 +26,9 @@ function HomeScreen() {
     const amount = parseUnits(amountEth, 18);
     if (amount.lte("0")) {
       return window.alert("Only values greater than 0");
-    } else if (amount.gt(parseUnits(arbBalance, 18))) {
+    } 
+    
+    if (amount.gt(parseUnits(arbBalance, 18))) {
       return window.alert("Not enough balance");
     }
 
