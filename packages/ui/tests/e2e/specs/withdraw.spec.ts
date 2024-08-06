@@ -52,6 +52,10 @@ describe("/withdraw", () => {
     it("should enable the confirm button if the user checks the conditions", () => {
         // prepare
         cy.visit(`/withdraw?amount="${withdrawAmount}"`)
+
+        // assert
+        cy.contains("Confirm Withdrawal").should("be.disabled")
+
         cy.get("#terms-time").click()
         cy.get("#terms-fees").click()
         cy.get("#terms-sequencer").click()
