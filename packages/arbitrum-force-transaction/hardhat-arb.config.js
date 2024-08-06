@@ -8,7 +8,7 @@ module.exports = {
       chainId: 421614,
       blockGasLimit: 200000000,
       forking: {
-        url: process.env.ARB_SEPOLIA_RPC,
+        url: process.env.FORK_L2_RPC,
         blockNumber: 67721640
       },
     },
