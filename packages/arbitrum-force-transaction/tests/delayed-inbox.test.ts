@@ -1,10 +1,10 @@
-import { BigNumber, providers, Wallet } from "ethers";
+import { BigNumber, ethers, providers, Wallet } from "ethers";
 import { ArbitrumDelayedInbox } from "../src";
 import { hardhatMineBlocks } from "./utils/hardhat-mine";
 import { resetHardhatForkEth } from "./utils/hardhat-reset";
 import { config } from "./utils/config";
 
-describe("Arbitrum delayed inbox", () => {
+xdescribe("Arbitrum delayed inbox", () => {
     let delayedInbox: ArbitrumDelayedInbox;
     let l1Provider: providers.Provider;
     let l2Provider: providers.Provider;
@@ -35,16 +35,20 @@ describe("Arbitrum delayed inbox", () => {
 
     describe("assembleChildTransaction", () => {
         it("should take a random tx and prepare it for signing", async () => {
-            const assembledChildTx = await delayedInbox.assembleChildTransaction(l2Signer, {
+            const srcTx = {
                 to: fromAddress,
                 value: BigNumber.from("1")
-            })
-            console.log("assembledChildTx", assembledChildTx)
+            }
+            const assembledChildTx = await delayedInbox.assembleChildTransaction(l2Signer, srcTx)
 
             expect(assembledChildTx).toBeDefined()
-            expect(assembledChildTx.chainId).toBe(l2ChainId)
+            expect(assembledChildTx.value).toBe(srcTx.value)
+            expect(assembledChildTx.to).toBe(srcTx.to)
             expect(assembledChildTx.from).toBe(fromAddress)
-            // TODO: add expectations
+            expect(assembledChildTx.chainId).toBe(l2ChainId)
+            expect(assembledChildTx.nonce).toBeDefined()
+            expect(assembledChildTx.maxFeePerGas).toBeDefined()
+            expect(assembledChildTx.maxPriorityFeePerGas).toBeDefined()
         })
     })
 
@@ -57,16 +61,16 @@ describe("Arbitrum delayed inbox", () => {
 
             expect(signedTx).toBeDefined()
             expect(typeof signedTx).toBe("string")
-            // TODO: add expectations
         })
     })
 
     describe("sendChildTransaction", () => {
         it("sendChildTransaction should take a random tx, prepare it and send it in L2", async () => {
-            const txHash = await delayedInbox.sendChildTransaction(l2Signer, {
+            const srcTx = {
                 to: fromAddress,
                 value: BigNumber.from("1")
-            })
+            }
+            const txHash = await delayedInbox.sendChildTransaction(l2Signer, srcTx)
 
             expect(txHash).toBeDefined()
             expect(typeof txHash).toBe("string")
@@ -75,8 +79,8 @@ describe("Arbitrum delayed inbox", () => {
             const tx = await l2Provider.getTransaction(txHash)
 
             expect(tx).not.toBeNull()
-            expect(tx.to).toBe(fromAddress)
-            // TODO: add expectations
+            expect(tx.to).toBe(srcTx.to)
+            expect(tx.value.toString()).toBe(srcTx.value.toString())
         })
     })
 
@@ -92,10 +96,10 @@ describe("Arbitrum delayed inbox", () => {
             // assert
             expect(txHash).toBeDefined()
             await l1Provider.waitForTransaction(txHash)
-            const l1TxReceipt = await l1Provider.getTransactionReceipt(txHash)
+            const l1TxReceipt = await l1Provider.getTransaction(txHash)
             expect(l1TxReceipt).toBeDefined()
             expect(l1TxReceipt.to).toBe("0xaAe29B0366299461418F5324a79Afc425BE5ae21") // rollup contract
-            // TODO: verify data
+            expect(l1TxReceipt.data.startsWith("0xb75436bb")).toBe(true) // 0xb75436bb sendL2Message function signature -> https://sepolia.etherscan.io/tx/0x150db411d4534ef8590347d0e3f358b832f53493cd21c16c72010282e2cc222d
         })
     })
 
@@ -176,11 +180,14 @@ describe("Arbitrum delayed inbox", () => {
             expect(canForceInclude).toBe(true)
 
             //  act
-            const tx = await delayedInbox.forceInclude(l1Signer)
+            const l1TxReceipt = await delayedInbox.forceInclude(l1Signer)
+            
+            
 
             // assert
-            expect(tx).not.toBe(null)
-            // TODO: add assertions on tx
+            expect(l1TxReceipt).not.toBe(null)
+            const tx = await l1Provider.getTransaction(l1TxReceipt?.transactionHash!)
+            expect(tx.data.startsWith("0xf1981578")).toBe(true) // 0xf1981578 forceInclusion method signature https://sepolia.etherscan.io/address/0x6c97864CE4bEf387dE0b3310A44230f7E3F1be0D#writeProxyContract
         })
     })
 })

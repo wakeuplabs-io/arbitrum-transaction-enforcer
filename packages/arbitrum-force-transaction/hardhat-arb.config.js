@@ -9,7 +9,7 @@ module.exports = {
       blockGasLimit: 200000000,
       forking: {
         url: process.env.FORK_L2_RPC,
-        blockNumber: 67721640
+        blockNumber: 69375379 
       },
     },
   }

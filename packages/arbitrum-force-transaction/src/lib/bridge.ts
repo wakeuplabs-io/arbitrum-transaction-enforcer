@@ -30,9 +30,9 @@ export class ArbitrumBridge {
         }
     }
 
-    async getClaimStatus(txnHash: string): Promise<ClaimStatus> {
+    async getClaimStatus(l2TxnHash: string): Promise<ClaimStatus> {
         // First, let's find the Arbitrum txn from the txn hash provided
-        const receipt = await this.l2Provider.getTransactionReceipt(txnHash)
+        const receipt = await this.l2Provider.getTransactionReceipt(l2TxnHash)
         if (receipt === null) {
             return ClaimStatus.PENDING;
         }
@@ -55,6 +55,7 @@ export class ArbitrumBridge {
         } else {
             return ClaimStatus.PENDING
         }
+
     }
 
     async claim(txnHash: string, l1Wallet: ethers.Signer): Promise<string | null> {

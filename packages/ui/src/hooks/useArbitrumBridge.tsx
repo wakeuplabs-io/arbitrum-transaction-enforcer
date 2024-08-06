@@ -12,6 +12,7 @@ import { useAccount, useSwitchChain } from "wagmi";
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from "wagmi/chains";
 import { useEthersProvider } from "./useEthersProvider";
 import { useEthersSigner } from "./useEthersSigner";
+import { ArbitrumBridge } from "arbitrum-force-transaction"
 
 export enum ClaimStatus {
   PENDING = "PENDING",
