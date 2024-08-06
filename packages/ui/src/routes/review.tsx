@@ -4,12 +4,13 @@ import StepOneIcon from "@/assets/step-one.svg";
 import StepThreeIcon from "@/assets/step-three.svg";
 import StepTwoIcon from "@/assets/step-two.svg";
 import useArbitrumBridge from "@/hooks/useArbitrumBridge";
+import { getL1TxPrice, getL2TxPrice, MockL1SendL2MessageTx, MockL2WithdrawTx } from "@/lib/get-tx-price";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import cn from "classnames";
 import { BigNumber } from "ethers";
 import { formatEther } from "ethers/lib/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type SearchParams = {
   amount: string;
@@ -42,7 +43,8 @@ function ReviewScreen() {
     useState<boolean>(false);
   const [approvedTime, setApprovedTime] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
-
+  const [withdrawPrice, setWithdrawPrice] = useState<string>("");
+  const [_, setConfirmWithdrawPrice] = useState<string>();
   const { initiateWithdraw } = useArbitrumBridge();
 
   function onContinue() {
@@ -68,6 +70,11 @@ function ReviewScreen() {
   const canContinue = useMemo(() => {
     return approvedAproxFees && approvedSequencerMaySpeedUp && approvedTime;
   }, [approvedAproxFees, approvedSequencerMaySpeedUp, approvedTime]);
+
+  useEffect(() => {
+    getL1TxPrice(MockL1SendL2MessageTx).then(x => setConfirmWithdrawPrice(x));
+    getL2TxPrice(MockL2WithdrawTx).then(x => setWithdrawPrice(x));
+  }, []);
 
   return (
     <div className="flex flex-col max-w-xl mx-auto gap-6">
@@ -108,7 +115,7 @@ function ReviewScreen() {
           <div className="flex flex-col md:flex-row md:justify-between w-full">
             <span className="block text-left">Initiate Withdraw</span>
             <div className="flex items-center flex-row gap-2">
-              <span className="text-sm">0.012 ETH</span>
+              <span className="text-sm">{withdrawPrice.slice(0, 10)} ETH</span>
               <span className="text-neutral-400 text-sm">~ $-</span>
             </div>
           </div>
