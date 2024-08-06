@@ -4,7 +4,7 @@ import StepOneIcon from "@/assets/step-one.svg";
 import StepThreeIcon from "@/assets/step-three.svg";
 import StepTwoIcon from "@/assets/step-two.svg";
 import useArbitrumBridge from "@/hooks/useArbitrumBridge";
-import { getL1TxPrice, getL2TxPrice, MockL1ClaimTx, MockL1SendL2MessageTx, MockL2WithdrawTx } from "@/lib/get-tx-price";
+import { getL1TxPrice, getL1TxPriceFromGasLimit, getL2TxPrice, L1ClaimTxGasLimit, MockL1SendL2MessageTx, MockL2WithdrawTx } from "@/lib/get-tx-price";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import cn from "classnames";
@@ -76,7 +76,7 @@ function WithdrawScreen() {
 
   useEffect(() => {
     getL1TxPrice(MockL1SendL2MessageTx).then(setConfirmWithdrawPrice);
-    getL1TxPrice(MockL1ClaimTx).then(setClaimPrice);
+    getL1TxPriceFromGasLimit(L1ClaimTxGasLimit).then(setClaimPrice);
     getL2TxPrice(MockL2WithdrawTx).then(setWithdrawPrice);
   }, []);
 
