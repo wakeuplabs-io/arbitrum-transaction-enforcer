@@ -5,7 +5,6 @@ import { GoogleCalendarIcon } from "@/components/icons";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import { ONE_HOUR } from "@/lib/add-to-calendar";
 import { transactionsStorageService } from "@/lib/transactions";
-import type { ErrorComponentProps } from "@tanstack/react-router";
 import {
   ErrorComponent,
   createFileRoute,

@@ -1,4 +1,5 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import cn from "classnames";
 
 export default function CustomConnectButton(
   props: React.ComponentProps<"button">
@@ -18,38 +19,22 @@ export default function CustomConnectButton(
 
         return (
           <div
-            {...(!ready && {
-              "aria-hidden": true,
-              style: {
-                opacity: 0,
-                pointerEvents: "none",
-                userSelect: "none",
-              },
-            })}
+            className={cn(!ready && "opacity-0 pointer-events-none select-none")}
+            aria-hidden={!ready}
           >
-            {(() => {
-              if (!connected) {
-                return (
-                  <button onClick={openConnectModal} type="button" {...props}>
-                    {props.children ?? "Connect Wallet"}
-                  </button>
-                );
-              }
-
-              if (chain.unsupported) {
-                return (
-                  <button onClick={openChainModal} type="button" {...props}>
-                    Wrong network
-                  </button>
-                );
-              }
-
-              return (
-                <button onClick={openAccountModal} type="button" {...props}>
-                  {account.displayName}
-                </button>
-              );
-            })()}
+            {!connected ? (
+              <button onClick={openConnectModal} type="button" {...props}>
+                {props.children ?? "Connect Wallet"}
+              </button>
+            ) : chain.unsupported ? (
+              <button onClick={openChainModal} type="button" {...props}>
+                Wrong network
+              </button>
+            ) : (
+              <button onClick={openAccountModal} type="button" {...props}>
+                {account.displayName}
+              </button>
+            )}
           </div>
         );
       }}
