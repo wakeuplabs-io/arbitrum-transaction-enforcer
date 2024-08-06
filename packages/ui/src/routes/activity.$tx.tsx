@@ -5,7 +5,6 @@ import { GoogleCalendarIcon } from "@/components/icons";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import { ONE_HOUR } from "@/lib/add-to-calendar";
 import { transactionsStorageService } from "@/lib/transactions";
-import type { ErrorComponentProps } from "@tanstack/react-router";
 import {
   ErrorComponent,
   createFileRoute,
@@ -23,16 +22,12 @@ export const Route = createFileRoute("/activity/$tx")({
     if (!tx) throw notFound();
     return tx;
   },
-  errorComponent: PostErrorComponent as any,
+  errorComponent: ErrorComponent,
   notFoundComponent: () => {
-    return <p>Post not found</p>;
+    return <p>Transaction not found</p>;
   },
   component: PostComponent,
 });
-
-export function PostErrorComponent({ error }: ErrorComponentProps) {
-  return <ErrorComponent error={error} />;
-}
 
 function PostComponent() {
   const transaction = Route.useLoaderData();

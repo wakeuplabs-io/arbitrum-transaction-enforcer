@@ -4,7 +4,7 @@ import ChevronDownIcon from "@/assets/chevron-down.svg";
 import ChevronLeftIcon from "@/assets/chevron-left.svg";
 import EthereumIcon from "@/assets/ethereum-icon.svg";
 import WalletIcon from "@/assets/wallet.svg";
-import CustomConnectButton from "@/components/styled/connectButton/customConnectButton";
+import CustomConnectButton from "@/components/connect-wallet";
 import useArbitrumBalance from "@/hooks/useArbitrumBalance";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import cn from "classnames";
@@ -24,17 +24,19 @@ export default function TransactionAmount({
   const { openConnectModal } = useConnectModal();
   const { address } = useAccount();
   const arbBalance = useArbitrumBalance();
-  const [amountEth, setAmountEth] = useState<string>(formatEther(amountInWei ?? "0"))
+  const [amountEth, setAmountEth] = useState<string>(
+    formatEther(amountInWei ?? "0")
+  );
 
   function handleSubmit() {
     if (amountEth.includes("-")) {
-      return window.alert("Only positive values")
+      return window.alert("Only positive values");
     }
 
-    const amount = parseUnits(amountEth, 18)
+    const amount = parseUnits(amountEth, 18);
 
     if (amount.gt(parseUnits(arbBalance, 18))) {
-      return window.alert("Not enough balance")
+      return window.alert("Not enough balance");
     }
     onSubmit(amount.toString());
   }
@@ -110,14 +112,7 @@ export default function TransactionAmount({
               <img src={WalletIcon} />
               <div>Address</div>
             </div>
-            <CustomConnectButton
-              variant="outlined"
-              size="small"
-              accountStatus={"address"}
-              showBalance={false}
-              chainStatus={"none"}
-              label="..."
-            />
+            <CustomConnectButton>...</CustomConnectButton>
           </div>
           {/* <div className="w-full flex justify-between items-center h-9">
             <div className="flex gap-3">

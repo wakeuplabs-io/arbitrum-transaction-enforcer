@@ -1,6 +1,7 @@
 import ArbitrumConnectIcon from "@/assets/arbitrum-connect.svg";
-import CustomConnectButton from "@/components/styled/connectButton/customConnectButton";
+import CustomConnectButton from "@/components/connect-wallet";
 import { Link } from "@tanstack/react-router";
+import { WalletIcon } from "lucide-react";
 
 export default function Topbar() {
   return (
@@ -16,7 +17,10 @@ export default function Topbar() {
           <Link to="/activity" className="btn btn-outline rounded-2xl hover:border-gray-300 hover:text-gray-500">
             My activity
           </Link>
-          <CustomConnectButton border="square" />
+          <CustomConnectButton id="topbar-connect-wallet" className="btn btn-primary rounded-2xl" >
+            <WalletIcon className="h-5 w-5" />
+            Connect Wallet
+          </CustomConnectButton>
         </div>
       </div>
     </header>
