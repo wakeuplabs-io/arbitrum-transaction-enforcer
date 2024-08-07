@@ -1,5 +1,4 @@
 import ArbitrumIcon from "@/assets/arbitrum-icon.svg";
-import ArrowRightIcon from "@/assets/arrow-right.svg";
 import EthereumIcon from "@/assets/ethereum-icon.svg";
 import WalletIcon from "@/assets/wallet.svg";
 import CustomConnectButton from "@/components/connect-wallet";
@@ -8,6 +7,7 @@ import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import cn from "classnames";
 import { parseUnits } from "ethers/lib/utils";
+import { CircleArrowRight } from 'lucide-react';
 import { useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -26,8 +26,8 @@ function HomeScreen() {
     const amount = parseUnits(amountEth, 18);
     if (amount.lte("0")) {
       return window.alert("Only values greater than 0");
-    } 
-    
+    }
+
     if (amount.gt(parseUnits(arbBalance, 18))) {
       return window.alert("Not enough balance");
     }
@@ -49,7 +49,7 @@ function HomeScreen() {
               <div className="font-semibold text-xl md:hidden">ARB</div>
             </div>
           </div>
-          <img src={ArrowRightIcon} />
+          <CircleArrowRight strokeWidth={1.5} />
           <div className="flex flex-row gap-3 items-start">
             <img src={EthereumIcon} />
             <div>

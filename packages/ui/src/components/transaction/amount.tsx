@@ -1,7 +1,4 @@
 import ArbitrumIcon from "@/assets/arbitrum-icon.svg";
-import ArrowRightIcon from "@/assets/arrow-right.svg";
-import ChevronDownIcon from "@/assets/chevron-down.svg";
-import ChevronLeftIcon from "@/assets/chevron-left.svg";
 import EthereumIcon from "@/assets/ethereum-icon.svg";
 import WalletIcon from "@/assets/wallet.svg";
 import CustomConnectButton from "@/components/connect-wallet";
@@ -9,6 +6,7 @@ import useArbitrumBalance from "@/hooks/useArbitrumBalance";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import cn from "classnames";
 import { formatEther, parseUnits } from "ethers/lib/utils";
+import { CircleArrowRight } from 'lucide-react';
 import { useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -48,7 +46,6 @@ export default function TransactionAmount({
         className="flex items-center flex-row gap-3 mb-4"
         onClick={onBack}
       >
-        <img src={ChevronLeftIcon} />
         <div className="font-semibold text-xl">Back</div>
       </button>
       <div className="flex flex-col gap-6">
@@ -60,7 +57,7 @@ export default function TransactionAmount({
               <div className="font-semibold text-2xl">Arbitrum</div>
             </div>
           </div>
-          <img src={ArrowRightIcon} />
+          <CircleArrowRight strokeWidth={1} />
           <div className="flex flex-row gap-3 items-start">
             <img src={EthereumIcon} />
             <div>
@@ -102,7 +99,6 @@ export default function TransactionAmount({
               >
                 Max
               </button>
-              <img src={ChevronDownIcon} />
             </div>
           </div>
         </div>

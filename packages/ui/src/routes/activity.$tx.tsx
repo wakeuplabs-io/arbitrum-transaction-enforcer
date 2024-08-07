@@ -1,5 +1,3 @@
-import BellIcon from "@/assets/bell.svg";
-import CheckGreenIcon from "@/assets/check-green.svg";
 import { AddToCalendarButton } from "@/components/add-to-calendar";
 import { GoogleCalendarIcon } from "@/components/icons";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
@@ -12,7 +10,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import cn from "classnames";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Bell, CircleCheck } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { formatEther } from "viem";
 
@@ -59,7 +57,7 @@ function PostComponent() {
   return (
     <div className="flex flex-col gap-6 max-w-xl mx-auto">
       <div className="flex flex-col items-center">
-        <img src={CheckGreenIcon} />
+        <CircleCheck size={48} color="#22C55E" />
         <div className="text-4xl font-semibold mb-6">Hey! Great Job!</div>
         <div className="md:text-xl">
           Your withdrawal request for{" "}
@@ -183,7 +181,7 @@ function PostComponent() {
         }}
         onClick={() => navigate({ to: "/activity" })}
       >
-        <img src={BellIcon} />
+        <Bell />
         Go to my activity
       </button>
       <button
