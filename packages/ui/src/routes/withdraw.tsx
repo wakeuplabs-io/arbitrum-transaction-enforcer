@@ -1,8 +1,4 @@
-import ChevronLeftIcon from "@/assets/chevron-left.svg";
 import EthIcon from "@/assets/ethereum-icon.svg";
-import StepOneIcon from "@/assets/step-one.svg";
-import StepThreeIcon from "@/assets/step-three.svg";
-import StepTwoIcon from "@/assets/step-two.svg";
 import useArbitrumBridge from "@/hooks/useArbitrumBridge";
 import { getL1TxPrice, getL1TxPriceFromGasLimit, getL2TxPrice, L1ClaimTxGasLimit, MockL1SendL2MessageTx, MockL2WithdrawTx } from "@/lib/get-tx-price";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
@@ -10,6 +6,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import cn from "classnames";
 import { BigNumber } from "ethers";
 import { formatEther } from "ethers/lib/utils";
+import { ChevronLeft } from 'lucide-react';
 import { useEffect, useMemo, useState } from "react";
 
 interface SearchParams {
@@ -46,7 +43,7 @@ function WithdrawScreen() {
   const [approvedTime, setApprovedTime] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [withdrawPrice, setWithdrawPrice] = useState<string>("");
-  const [_, setConfirmWithdrawPrice] = useState<string>("");
+  const [confirmWithdrawPrice, setConfirmWithdrawPrice] = useState<string>("");
   const [claimPrice, setClaimPrice] = useState<string>("");
   const { initiateWithdraw } = useArbitrumBridge();
 
@@ -86,7 +83,7 @@ function WithdrawScreen() {
         className="flex items-center flex-row gap-3"
         onClick={() => navigate({ to: "/" })}
       >
-        <img src={ChevronLeftIcon} />
+        <ChevronLeft size={20} />
         <div className="font-semibold text-xl">Review and confirm</div>
       </button>
 
@@ -116,9 +113,11 @@ function WithdrawScreen() {
         </div>
 
         <div className="w-full flex items-center gap-3">
-          <img src={StepOneIcon} />
+          <div className="h-5 min-w-5 mt-1 flex justify-center items-center rounded-full border-2 border-gray-800">
+            <span className="text-xs">1</span>
+          </div>
           <div className="flex flex-col md:flex-row md:justify-between w-full">
-            <span className="block text-left">Initiate Withdraw</span>
+            <span className="block text-left">Initiate Withdrawal</span>
             <div className="flex items-center flex-row gap-2">
               <span className="text-sm">{withdrawPrice.slice(0, 10)} ETH</span>
               <span className="text-neutral-400 text-sm">~ $-</span>
@@ -127,7 +126,22 @@ function WithdrawScreen() {
         </div>
 
         <div className="w-full flex items-center gap-3">
-          <img src={StepTwoIcon} />
+          <div className="h-5 min-w-5 mt-1 flex justify-center items-center rounded-full border-2 border-gray-800">
+            <span className="text-xs">2</span>
+          </div>
+          <div className="flex flex-col md:flex-row md:justify-between w-full">
+            <span className="block text-left">Confirm Withdrawal</span>
+            <div className="flex items-center flex-row gap-2">
+              <span className="text-sm">{confirmWithdrawPrice.slice(0, 10)} ETH</span>
+              <span className="text-neutral-400 text-sm">~ $-</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full flex items-center gap-3">
+          <div className="h-5 min-w-5 mt-1 flex justify-center items-center rounded-full border-2 border-gray-800">
+            <span className="text-xs">3</span>
+          </div>
           <div className="flex flex-col md:flex-row md:justify-between w-full">
             <p className="text-left">Waiting Period</p>
             <p className="text-left text-sm">~ 24 hours</p>
@@ -135,7 +149,9 @@ function WithdrawScreen() {
         </div>
 
         <div className="w-full flex items-center gap-3">
-          <img src={StepThreeIcon} />
+          <div className="h-5 min-w-5 mt-1 flex justify-center items-center rounded-full border-2 border-gray-800">
+            <span className="text-xs">4</span>
+          </div>
           <div className="flex flex-col md:flex-row md:justify-between w-full">
             <p className="text-left">Claim funds on Ethereum</p>
 
