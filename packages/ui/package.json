@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "type-check": "tsc",
-    "build": "tsr generate && tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "postinstall": "patch-package",
     "e2e:run": "synpress run --configFile synpress.config.js",
