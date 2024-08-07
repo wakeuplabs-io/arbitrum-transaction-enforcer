@@ -5,9 +5,10 @@ on:
     branches:
       - main
       - develop
+    paths:
+      - "packages/ui/**"
     paths-ignore:
-      - "**/template.yml"
-      - "**/template.yaml"
+      - "packages/ui/template.yml"
 
 jobs:
   Deploy:
