@@ -5,8 +5,13 @@ Description: >
 
 Parameters:
   StackName:
+    Description: The cloudformation stack name, MUST be lower case
     Type: String
-  DomainName:
+  DomainName: 
+    Description: The domain name of the existing Route 53 hosted zone, should match HostedZoneId
+    Type: String
+  HostedZoneId:
+    Description: The ID of the existing Route 53 hosted zone, should match DomainName
     Type: String
 
 Resources:
@@ -17,6 +22,7 @@ Resources:
       Parameters:
         StackName: !Ref StackName
         DomainName: !Ref DomainName
+        HostedZoneId: !Ref HostedZoneId
 
 Outputs:
   CloudFrontDistributionId:

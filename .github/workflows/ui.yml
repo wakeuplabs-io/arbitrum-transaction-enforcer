@@ -1,9 +1,10 @@
-name: prod-ui
+name: ui
 
 on:
   push:
     branches:
       - main
+      - develop
     paths-ignore:
       - "**/template.yml"
       - "**/template.yaml"
