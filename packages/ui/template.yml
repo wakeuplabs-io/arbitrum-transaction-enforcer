@@ -7,10 +7,13 @@ Parameters:
     Description: The cloudformation stack name, MUST be lower case
     Type: String
   DomainName: 
-    Description: The domain name of the existing Route 53 hosted zone, should match HostedZoneId
+    Description: The domain name of the existing Route 53 hosted zone
     Type: String
   HostedZoneId:
-    Description: The ID of the existing Route 53 hosted zone, should match DomainName
+    Description: The ID of the existing Route 53 hosted zone
+    Type: String
+  CertificateId:
+    Description: The ID of the existing certificate related to the domain name
     Type: String
 
 Resources:
@@ -118,7 +121,7 @@ Resources:
         Aliases:
           - !Sub ${S3Bucket}
         ViewerCertificate:
-          AcmCertificateArn: arn:aws:acm:us-east-1:447655722442:certificate/277170a8-44cb-444c-b1ee-677f5328956f
+          AcmCertificateArn: !Sub "arn:aws:acm:${AWS::Region}:447655722442:certificate/${CertificateId}"
           SslSupportMethod: sni-only
           MinimumProtocolVersion: TLSv1.2_2021
           

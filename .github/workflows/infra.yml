@@ -24,4 +24,4 @@ jobs:
         run: sam build
 
       - name: SAM Deploy
-        run: sam deploy --stack-name ${{ vars.STACK_NAME }} --parameter-overrides StackName='${{ vars.STACK_NAME }}' DomainName='${{vars.UI_DOMAIN}}' HostedZoneId='${{VARS.HOSTED_ZONE_ID}}'
+        run: sam deploy --stack-name ${{ vars.STACK_NAME }} --parameter-overrides StackName='${{ vars.STACK_NAME }}' DomainName='${{vars.UI_DOMAIN}}' HostedZoneId='${{VARS.AWS_HOSTED_ZONE_ID}}' CertificateId='${{VARS.AWS_CERTIFICATE_ID}}'
