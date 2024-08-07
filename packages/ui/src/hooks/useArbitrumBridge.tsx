@@ -46,7 +46,8 @@ export default function useArbitrumBridge() {
   }
 
   async function sendWithDelayedInbox(tx: any) {
-    const l2Network = await getArbitrumNetwork(childNetworkId);
+    await ensureChainId(childNetworkId);
+    const l2Network = getArbitrumNetwork(childNetworkId);
     const inboxSdk = new InboxTools(signer!, l2Network);
 
     // extract l2's tx hash first so we can check if this tx executed on l2 later.
@@ -54,15 +55,7 @@ export default function useArbitrumBridge() {
     const l2SignedTx = await inboxSdk.signChildTx(tx, l2Signer);
     const l2Txhash = l2SignedTx;
 
-    // send tx to l1 delayed inbox
-    await ensureChainId(parentChainId);
-    const resultsL1 = await inboxSdk.sendChildSignedTx(l2SignedTx);
-    if (resultsL1 == null) {
-      throw new Error(`Failed to send tx to l1 delayed inbox!`);
-    }
-    const inboxRec = await resultsL1.wait();
-
-    return { l2Txhash, l1Txhash: inboxRec.transactionHash };
+    return { l2Txhash };
   }
 
   async function isForceIncludePossible(parentSigner: ethers.providers.JsonRpcSigner) {
@@ -111,6 +104,21 @@ export default function useArbitrumBridge() {
     );
   }
 
+  async function pushChildTxToParent(l2SignedTx: string, parentSigner: ethers.providers.JsonRpcSigner) {
+    await ensureChainId(parentChainId);
+    const l2Network = getArbitrumNetwork(childNetworkId);
+    const inboxSdk = new InboxTools(parentSigner, l2Network);
+
+    // send tx to l1 delayed inbox
+    const resultsL1 = await inboxSdk.sendChildSignedTx(l2SignedTx);
+    if (resultsL1 == null)
+      throw new Error(`Failed to send tx to l1 delayed inbox!`);
+
+    const inboxRec = await resultsL1.wait();
+
+    return inboxRec.transactionHash
+  }
+
   async function getClaimStatus(l2TxnHash: string, childProvider: ethers.providers.JsonRpcProvider, parentSigner: ethers.providers.JsonRpcSigner): Promise<ClaimStatus> {
     if (!l2TxnHash) {
       throw new Error(
@@ -132,7 +140,7 @@ export default function useArbitrumBridge() {
     // We assume there's only one / just grad the first one.
     const messages = await l2Receipt.getChildToParentMessages(parentSigner);
     const l2ToL1Msg = messages[0];
-    console.log("l2ToL1Msg: ", l2ToL1Msg)
+
     // Check if already executed
     if (
       (await l2ToL1Msg.status(childProvider)) ==
@@ -181,7 +189,6 @@ export default function useArbitrumBridge() {
     const res = await l2ToL1Msg.execute(childProvider);
     const rec = await res.wait();
 
-    console.log("Done! Your transaction is executed", rec);
     return rec;
   }
 
@@ -189,6 +196,7 @@ export default function useArbitrumBridge() {
     isForceIncludePossible,
     forceInclude,
     initiateWithdraw,
+    pushChildTxToParent,
     getClaimStatus,
     claimFunds,
     provider,

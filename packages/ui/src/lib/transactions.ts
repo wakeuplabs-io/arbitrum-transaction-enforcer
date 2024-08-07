@@ -1,20 +1,23 @@
-
 export interface Transaction {
   bridgeHash: string;
-  delayedInboxHash: string;
+  delayedInboxHash?: string;
   amount: string;
-  timestamp?: number;
+  timestamp: number;
 }
 
 export class TransactionsStorageService {
-  constructor(private readonly storageKey: string) { }
+  constructor(private readonly storageKey: string) {}
 
   getAll(): Transaction[] {
-    return JSON.parse(localStorage.getItem(this.storageKey) ?? "[]")
+    return JSON.parse(localStorage.getItem(this.storageKey) ?? "[]");
   }
 
   getByBridgeHash(hash: string): Transaction | null {
-    return this.getAll().find(t => t.bridgeHash.toLowerCase() === hash.toLowerCase()) ?? null
+    return (
+      this.getAll().find(
+        (t) => t.bridgeHash.toLowerCase() === hash.toLowerCase()
+      ) ?? null
+    );
   }
 
   create(tx: Transaction): void {
@@ -24,6 +27,14 @@ export class TransactionsStorageService {
     );
   }
 
+  update(tx: Transaction): void {
+    const txs = this.getAll();
+    const txToUpdateIndex = txs.findIndex((x) => x.bridgeHash == tx.bridgeHash);
+    txs[txToUpdateIndex] = tx;
+    localStorage.setItem(this.storageKey, JSON.stringify([...txs]));
+  }
 }
 
-export const transactionsStorageService = new TransactionsStorageService("transactions")
+export const transactionsStorageService = new TransactionsStorageService(
+  "transactions"
+);

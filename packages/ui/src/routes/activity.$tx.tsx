@@ -28,31 +28,72 @@ export const Route = createFileRoute("/activity/$tx")({
 });
 
 function PostComponent() {
-  const transaction = Route.useLoaderData();
+  const txParam = Route.useLoaderData();
   const navigate = useNavigate();
-  const { signer, provider, forceInclude, isForceIncludePossible, getClaimStatus, claimFunds } = useArbitrumBridge();
-  const [canForce, setCanForce] = useState<boolean>();
+  const { signer, provider, forceInclude, isForceIncludePossible, getClaimStatus, claimFunds, pushChildTxToParent } = useArbitrumBridge();
+  const [canForce, setCanForce] = useState<boolean | undefined>(false);
   const [claimStatus, setClaimStatus] = useState<ClaimStatus>();
-  const [executed, setExecuted] = useState(false);
+  const [canConfirm, setCanConfirm] = useState<boolean>();
+  const [transaction, setTransaction] = useState(txParam);
 
-  const enableForce = canForce && claimStatus === ClaimStatus.PENDING;
+  const enableForce = canForce && claimStatus && claimStatus === ClaimStatus.PENDING;
+
+  function onConfirm() {
+    if (!signer) return;
+    pushChildTxToParent(transaction.bridgeHash, signer)
+      .then(inboxTx => {
+        const updatedTx = { ...transaction, delayedInboxHash: inboxTx };
+        setTransaction(updatedTx);
+        transactionsStorageService.update(updatedTx);
+      })
+      .catch((e) =>
+        window.alert(
+          "Something went wrong, please try again. " + e.message
+        )
+      );
+  }
+  function onForce() {
+    if (!signer) return;
+    forceInclude(signer).catch((e) =>
+      window.alert(
+        "Something went wrong, please try again. " + e.message
+      )
+    );
+  }
+  function onClaim() {
+    if (!provider || !signer) return;
+    claimFunds(transaction.bridgeHash, provider, signer)
+      .catch((e) =>
+        window.alert(
+          "Something went wrong, please try again. " + e.message
+        )
+      )
+  }
 
 
   useEffect(() => {
-    if (!signer || !provider) return;
-    if (!executed) {
-      //React query would be nicer
-      setExecuted(true);
+    if (!signer || !provider || canConfirm === undefined) return;
+    if (canConfirm) {
+      setClaimStatus(ClaimStatus.PENDING)
+      setCanForce(false);
+    }
+    else if (!claimStatus)
       getClaimStatus(transaction.bridgeHash, provider, signer).then((x) => {
-        console.log("canClaim? :", x);
         setClaimStatus(x);
+        if (x === ClaimStatus.PENDING) {
+          setCanForce(undefined);
+          isForceIncludePossible(signer).then(x => {
+            setCanForce(x);
+          });
+        }
+        else
+          setCanForce(false);
       })
-      isForceIncludePossible(signer).then(x => {
-        console.log("canForce? :", x);
-        setCanForce(x);
-      });
-    };
-  }, [signer, provider]);
+  }, [signer, provider, canConfirm, claimStatus]);
+
+  useEffect(() => {
+    setCanConfirm(!transaction.delayedInboxHash)
+  }, [transaction])
 
   return (
     <div className="flex flex-col gap-6 max-w-xl mx-auto">
@@ -77,7 +118,7 @@ function PostComponent() {
             done
             number={1}
             title="Initiate Withdraw"
-            description="Here your transactions in Arbitrum and the corresponding delayed inbox tx in ethereum"
+            description="Your withdraw transaction in Arbitrum"
             className="pt-2 md:flex md:space-x-4"
           >
             <a
@@ -88,7 +129,27 @@ function PostComponent() {
               <span>Arbitrum tx </span>
               <ArrowUpRight className="h-3 w-3" />
             </a>
-            <a
+          </Step>
+
+          <Step
+            done={canConfirm !== undefined && !canConfirm}
+            loading={canConfirm === undefined}
+            number={2}
+            title="Confirm Withdraw"
+            description="Push the withdraw transaction through the delayed inbox"
+            className="pt-2 space-y-2 md:space-y-0 md:space-x-2 flex items-start flex-col md:flex-row md:items-center"
+          >
+            {canConfirm &&
+              <>
+                <button
+                  onClick={onConfirm}
+                  className="btn btn-primary btn-sm"
+                >
+                  Confirm
+                </button>
+              </>
+            }
+            {!canConfirm && <><a
               href={`https://sepolia.etherscan.io/tx/${transaction.delayedInboxHash}`}
               target="_blank"
               className="link text-sm flex space-x-1 items-center"
@@ -96,62 +157,52 @@ function PostComponent() {
               <span>Ethereum delayed inbox tx </span>
               <ArrowUpRight className="h-3 w-3" />
             </a>
-          </Step>
-
-          <Step
-            done={(claimStatus === ClaimStatus.CLAIMED && !canForce) || claimStatus === ClaimStatus.CLAIMABLE}
-            number={2}
-            title="Force transaction"
-            description="If after 24 hours your Arbitrum transaction hasn't been mined, you can push it forward manually with some extra fee in ethereum"
-            className="pt-2 space-y-2 md:space-y-0 md:space-x-2 flex items-start flex-col md:flex-row md:items-center"
-          >
-            {enableForce === undefined && <Spinner />}
-            {enableForce &&
-              <>
-                <button
-                  onClick={() => {
-                    signer && forceInclude(signer).catch((e) =>
-                      window.alert(
-                        "Something went wrong, please try again. " + e.message
-                      )
-                    );
-                  }}
-                  className="btn btn-primary btn-sm"
-                >
-                  Force include
-                </button>
+              {!canForce && claimStatus === ClaimStatus.PENDING &&
                 <AddToCalendarButton
                   className="btn btn-sm space-x-1"
                   event={{
                     title: "Push forward your transaction",
                     description: "Wait is over, if your transaction hasn't go through by now, you can force include it from Arbitrum connect.",
-                    startDate: new Date((transaction.timestamp ?? Date.now()) + 24 * ONE_HOUR),
-                    endDate: new Date((transaction.timestamp ?? Date.now()) + 25 * ONE_HOUR),
+                    startDate: new Date((transaction.timestamp) + 24 * ONE_HOUR),
+                    endDate: new Date((transaction.timestamp) + 25 * ONE_HOUR),
                   }}
                 >
                   <GoogleCalendarIcon className="h-4 w-4" />
                   <span>Create reminder</span>
                 </AddToCalendarButton>
+              }</>}
+          </Step>
+          <Step
+            done={(claimStatus === ClaimStatus.CLAIMED && !canForce) || claimStatus === ClaimStatus.CLAIMABLE}
+            loading={enableForce === undefined}
+            number={3}
+            title="Force transaction"
+            description="If after 24 hours your Arbitrum transaction hasn't been mined, you can push it forward manually with some extra fee in ethereum"
+            className="pt-2 space-y-2 md:space-y-0 md:space-x-2 flex items-start flex-col md:flex-row md:items-center"
+          >
+            {enableForce &&
+              <>
+                <button
+                  onClick={onForce}
+                  className="btn btn-primary btn-sm"
+                >
+                  Force include
+                </button>
               </>
             }
           </Step>
 
           <Step
             done={claimStatus === ClaimStatus.CLAIMED}
-            number={3}
+            loading={claimStatus === undefined}
+            number={4}
             className="pt-2"
             title="Claim funds on Ethereum"
             description="After your transaction has been validated, you can follow the state of it and claim your funds in the arbitrum bridge page by just connecting your wallet."
           >
-            {!claimStatus && <Spinner />}
             {claimStatus === ClaimStatus.CLAIMABLE &&
               <a
-                onClick={() => provider && signer && claimFunds(transaction.bridgeHash, provider, signer).catch((e) =>
-                  window.alert(
-                    "Something went wrong, please try again. " + e.message
-                  )
-                )}
-                href="https://bridge.arbitrum.io/"
+                onClick={onClaim}
                 target="_blank"
                 className="link text-sm flex space-x-1 items-center"
               >
@@ -162,7 +213,13 @@ function PostComponent() {
             {claimStatus === ClaimStatus.CLAIMED &&
               <a className="text-sm flex space-x-1 items-center text-green-500 font-semibold">
                 <span>claimed</span>
-              </a>}
+              </a>
+            }
+            {claimStatus === ClaimStatus.PENDING &&
+              <a className="text-sm flex space-x-1 items-center font-semibold">
+                <span>pending</span>
+              </a>
+            }
           </Step>
         </div>
         <div className="bg-gray-200 px-4 py-3">
@@ -206,6 +263,7 @@ function Step(props: {
   children?: React.ReactNode;
   className?: string;
   done?: boolean;
+  loading?: boolean
 }) {
   return (
     <div className={"flex items-center justify-between"}>
@@ -221,7 +279,10 @@ function Step(props: {
         <div>
           <h2 className={cn("text-lg", { "text-green-500": props.done })}>{props.title}</h2>
           <p className="text-sm">{props.description}</p>
-          <div className={props.className}>{props.children}</div>
+          {props.loading && <Spinner />}
+          {!props.loading &&
+            <div className={props.className}>{props.children}</div>
+          }
         </div>
       </div>
     </div>

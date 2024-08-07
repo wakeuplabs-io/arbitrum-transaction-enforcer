@@ -20,7 +20,6 @@ export const Route = createFileRoute("/withdraw")({
       if (!search.amount) throw new Error("Amount is required");
       return { amount: BigNumber.from((search.amount as string).replace(/"/g, '')).toString() ?? "0" };
     } catch (e) {
-      console.log("e", e)
       return { amount: "0" };
     }
   },
@@ -32,7 +31,6 @@ function WithdrawScreen() {
 
   useEffect(() => {
     if (BigNumber.from(amountInWei).lte(0)) {
-      console.log("amountInWei", amountInWei);
       navigate({ to: "/" });
     }
   }, [amountInWei]);
@@ -53,7 +51,6 @@ function WithdrawScreen() {
       .then((x) => {
         const tx: Transaction = {
           bridgeHash: x.l2Txhash,
-          delayedInboxHash: x.l1Txhash,
           amount: String(amountInWei),
           timestamp: Date.now(),
         };
