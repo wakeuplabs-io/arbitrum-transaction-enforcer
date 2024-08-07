@@ -136,9 +136,6 @@ Resources:
         - !GetAtt CloudFrontDistribution.DomainName
 
 Outputs:
-  CloudFrontDistributionId:
-    Description: CloudFront Distribution ID
-    Value: !Ref CloudFrontDistribution
-  CloudFrontUrl:
-    Description: CloudFront Distribution Url
-    Value: !GetAtt CloudFrontDistribution.DomainName
+  Url:
+    Description: Public URL
+    Value: !Sub ${S3Bucket}

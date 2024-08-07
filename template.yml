@@ -25,9 +25,6 @@ Resources:
         HostedZoneId: !Ref HostedZoneId
 
 Outputs:
-  CloudFrontDistributionId:
-    Description: "CloudFront Distribution ID from the UI stack"
-    Value: !GetAtt UI.Outputs.CloudFrontDistributionId
-  CloudFrontUrl:
-    Description: "CloudFront Domain Name from the UI stack"
-    Value: !GetAtt UI.Outputs.CloudFrontUrl
+  UIUrl:
+    Description: UI public access URL
+    Value: !GetAtt UI.Outputs.Url
