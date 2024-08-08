@@ -1,6 +1,6 @@
 export interface Transaction {
-  bridgeHash: string;
-  delayedInboxHash?: string;
+  bridgeHash: `0x${string}`;
+  delayedInboxHash?: `0x${string}`;
   amount: string;
   timestamp: number;
 }
@@ -12,7 +12,7 @@ export class TransactionsStorageService {
     return JSON.parse(localStorage.getItem(this.storageKey) ?? "[]");
   }
 
-  getByBridgeHash(hash: string): Transaction | null {
+  getByBridgeHash(hash: `0x${string}`): Transaction | null {
     return (
       this.getAll().find(
         (t) => t.bridgeHash.toLowerCase() === hash.toLowerCase()

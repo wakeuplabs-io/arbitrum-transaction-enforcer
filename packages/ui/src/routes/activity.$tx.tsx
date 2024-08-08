@@ -3,6 +3,7 @@ import { GoogleCalendarIcon } from "@/components/icons";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import { ONE_HOUR } from "@/lib/add-to-calendar";
 import { transactionsStorageService } from "@/lib/transactions";
+import { getL1BlockTimestamp } from "@/lib/tx-actions";
 import {
   ErrorComponent,
   createFileRoute,
@@ -16,7 +17,7 @@ import { formatEther } from "viem";
 
 export const Route = createFileRoute("/activity/$tx")({
   loader: async ({ params }) => {
-    const tx = transactionsStorageService.getByBridgeHash(params.tx ?? "0x");
+    const tx = transactionsStorageService.getByBridgeHash((params.tx) as `0x${string}` ?? "0x");
     if (!tx) throw notFound();
     return tx;
   },
@@ -35,8 +36,9 @@ function PostComponent() {
   const [claimStatus, setClaimStatus] = useState<ClaimStatus>();
   const [canConfirm, setCanConfirm] = useState<boolean>();
   const [transaction, setTransaction] = useState(txParam);
+  const [remainingHours, setRemainingHours] = useState<number>();
 
-  const enableForce = canForce && claimStatus && claimStatus === ClaimStatus.PENDING;
+  const enableForce = !remainingHours && canForce && claimStatus && claimStatus === ClaimStatus.PENDING;
 
   function onConfirm() {
     if (!signer) return;
@@ -93,7 +95,11 @@ function PostComponent() {
 
   useEffect(() => {
     setCanConfirm(!transaction.delayedInboxHash)
-  }, [transaction])
+    transaction.delayedInboxHash && getL1BlockTimestamp(transaction.delayedInboxHash).then(txTimestamp => {
+      const remaining = Math.floor(((txTimestamp + 24 * ONE_HOUR) - new Date().valueOf()) / ONE_HOUR);
+      setRemainingHours(remaining < 0 ? 0 : remaining);
+    })
+  }, [transaction.delayedInboxHash])
 
   return (
     <div className="flex flex-col gap-6 max-w-xl mx-auto">
@@ -136,7 +142,7 @@ function PostComponent() {
             loading={canConfirm === undefined}
             number={2}
             title="Confirm Withdraw"
-            description="Push the withdraw transaction through the delayed inbox"
+            description="Send the Arbitrum withdraw transaction through the delayed inbox"
             className="pt-2 space-y-2 md:space-y-0 md:space-x-2 flex items-start flex-col md:flex-row md:items-center"
           >
             {canConfirm &&
@@ -190,6 +196,9 @@ function PostComponent() {
                 </button>
               </>
             }
+            {!canConfirm && claimStatus === ClaimStatus.PENDING && remainingHours !== undefined && (<a className="text-sm font-semibold">
+              <span>{remainingHours} / 24 hs</span>
+            </a>)}
           </Step>
 
           <Step

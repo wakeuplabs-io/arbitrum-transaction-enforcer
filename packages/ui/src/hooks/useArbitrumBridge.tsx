@@ -52,10 +52,9 @@ export default function useArbitrumBridge() {
 
     // extract l2's tx hash first so we can check if this tx executed on l2 later.
     const l2Signer = await getSigner(childNetworkId);
-    const l2SignedTx = await inboxSdk.signChildTx(tx, l2Signer);
-    const l2Txhash = l2SignedTx;
+    const l2Txhash = (await inboxSdk.signChildTx(tx, l2Signer)) as `0x${string}`;
 
-    return { l2Txhash };
+    return l2Txhash;
   }
 
   async function isForceIncludePossible(parentSigner: ethers.providers.JsonRpcSigner) {
@@ -104,7 +103,7 @@ export default function useArbitrumBridge() {
     );
   }
 
-  async function pushChildTxToParent(l2SignedTx: string, parentSigner: ethers.providers.JsonRpcSigner) {
+  async function pushChildTxToParent(l2SignedTx: `0x${string}`, parentSigner: ethers.providers.JsonRpcSigner) {
     await ensureChainId(parentChainId);
     const l2Network = getArbitrumNetwork(childNetworkId);
     const inboxSdk = new InboxTools(parentSigner, l2Network);
@@ -116,7 +115,7 @@ export default function useArbitrumBridge() {
 
     const inboxRec = await resultsL1.wait();
 
-    return inboxRec.transactionHash
+    return inboxRec.transactionHash as `0x${string}`
   }
 
   async function getClaimStatus(l2TxnHash: string, childProvider: ethers.providers.JsonRpcProvider, parentSigner: ethers.providers.JsonRpcSigner): Promise<ClaimStatus> {

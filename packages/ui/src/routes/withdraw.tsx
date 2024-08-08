@@ -48,9 +48,9 @@ function WithdrawScreen() {
   function onContinue() {
     setLoading(true);
     initiateWithdraw(String(amountInWei))
-      .then((x) => {
+      .then((l2Txhash) => {
         const tx: Transaction = {
-          bridgeHash: x.l2Txhash,
+          bridgeHash: l2Txhash,
           amount: String(amountInWei),
           timestamp: Date.now(),
         };
