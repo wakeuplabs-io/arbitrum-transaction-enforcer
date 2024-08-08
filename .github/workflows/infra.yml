@@ -1,16 +1,18 @@
-name: prod-infra
+name: infra
 
 on:
   push:
     branches:
       - main
+      - develop
     paths:
       - "**/template.yml"
-      - "**/template.yaml"
 
 jobs:
   Deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'Production' || github.ref == 'refs/heads/develop' && 'Staging'}}
+
     steps:
       - uses: actions/checkout@v4
       - name: Configure AWS credentials
@@ -24,4 +26,4 @@ jobs:
         run: sam build
 
       - name: SAM Deploy
-        run: sam deploy --stack-name ${{ vars.STACK_NAME }} --parameter-overrides StackName='${{ vars.STACK_NAME }}' DomainName='${{vars.UI_DOMAIN}}'
+        run: sam deploy --stack-name ${{ vars.STACK_NAME }} --parameter-overrides StackName='${{ vars.STACK_NAME }}' DomainName='${{vars.UI_DOMAIN}}' HostedZoneId='${{vars.AWS_HOSTED_ZONE_ID}}' CertificateId='${{vars.AWS_CERTIFICATE_ID}}'

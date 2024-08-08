@@ -10,5 +10,5 @@ export function AddToCalendarButton(props: {
     return new AddToCalendar().createGoogleUrl(props.event);
   }, [props.event]);
 
-  return <button onClick={() => window.open(eventUrl, "_blank")} className={props.className}>{props.children}</button>;
+  return <a data-test-id="create-reminder-btn" href={eventUrl} target={"_blank"} className={props.className}>{props.children}</a>;
 }

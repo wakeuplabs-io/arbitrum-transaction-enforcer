@@ -1,4 +1,23 @@
-# React Monorepo Template
+# Arbitrum transaction enforcer
+
+## Run ui cypress tests
+
+Setup a `.env` like this one.
+
+```
+PRIVATE_KEY=0xc64...
+# Uncomment to skip tests involving metamask
+# SKIP_METAMASK_SETUP=true
+# SKIP_METAMASK_INSTALL=true
+```
+
+If metamask is involved, tests should be runned one by one like:
+- `npx synpress run --configFile synpress.config.js --spec tests/e2e/specs/{name}.spec.ts`
+
+Otherwise you can run all tests together like 
+- `npm run e2e:run`
+- `pnpm e2e:run`
+
 
 ## Node and NPM version
 
