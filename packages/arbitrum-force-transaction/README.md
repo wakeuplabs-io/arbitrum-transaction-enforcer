@@ -16,20 +16,25 @@ To use `hardhat forks` you need to comment:line 272 within `signChildTx` in `@ar
 .env example
 
 ```bash
-# # testnets
-# DEVNET_PRIVKEY="0x..."
-# L1RPC="https://arb-sepolia...."
-# L2RPC="https://eth-sepolia...."
-
 # hardhat
-L1RPC="http://127.0.0.1:4000/"
-L2RPC="http://127.0.0.1:4001/"
-DEVNET_PRIVKEY="0x..."
+L1_RPC="http://127.0.0.1:4000/"
+L2_RPC="http://127.0.0.1:4001/"
+DEVNET_PRIVKEY="0xc64d6375895d0a..."
 
 # For hardhat forks
-ARB_SEPOLIA_RPC="https://arb-sepolia...."
-ETH_SEPOLIA_RPC="https://eth-sepolia...."
+FORK_L2_RPC="https://arb-sepolia...."
+FORK_L1_RPC="https://eth-sepolia...."
+
+
+FROM_ADDRESS="0x44cdA3f339444F..."
+FROM_PRIVATE_KEY="0xc64d6375895d0..."
 ```
+
+## Testing
+
+1. Setup `.env`
+2. Initiate eth and arb hardhart forks with `npm run start:arb` and `npm run start:eth`
+3. Run tests with `npm run test`
 
 # Commands
 
@@ -46,9 +51,11 @@ Or with `hardhat-mine`, adjust block, timestamp and rpc and run with `ts-node ha
 ## Start forks
 
 ```bash
-npx hardhat node --port 4000 --config hardhat-eth.config.js
+npm run start:arb
+npm run start:eth
 ```
 
-```bash
-npx hardhat node --port 4001 --config hardhat-arb.config.js
-```
+
+
+
+

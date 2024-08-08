@@ -5,8 +5,16 @@ Description: >
 
 Parameters:
   StackName:
+    Description: The cloudformation stack name, MUST be lower case
     Type: String
   DomainName:
+    Description: The domain name of the existing Route 53 hosted zone, should match HostedZoneId
+    Type: String
+  HostedZoneId:
+    Description: The ID of the existing Route 53 hosted zone, should match DomainName
+    Type: String
+  CertificateId:
+    Description: The ID of the existing certificate related to the domain name
     Type: String
 
 Resources:
@@ -17,11 +25,10 @@ Resources:
       Parameters:
         StackName: !Ref StackName
         DomainName: !Ref DomainName
+        HostedZoneId: !Ref HostedZoneId
+        CertificateId: !Ref CertificateId
 
 Outputs:
-  CloudFrontDistributionId:
-    Description: "CloudFront Distribution ID from the UI stack"
-    Value: !GetAtt UI.Outputs.CloudFrontDistributionId
-  CloudFrontUrl:
-    Description: "CloudFront Domain Name from the UI stack"
-    Value: !GetAtt UI.Outputs.CloudFrontUrl
+  UIUrl:
+    Description: UI public access URL
+    Value: !GetAtt UI.Outputs.Url

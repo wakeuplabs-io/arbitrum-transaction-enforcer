@@ -3,9 +3,17 @@ Transform: AWS::Serverless-2016-10-31
 Description: UI
 
 Parameters:
-  StackName: # must be lower case
+  StackName:
+    Description: The cloudformation stack name, MUST be lower case
     Type: String
-  DomainName:
+  DomainName: 
+    Description: The domain name of the existing Route 53 hosted zone
+    Type: String
+  HostedZoneId:
+    Description: The ID of the existing Route 53 hosted zone
+    Type: String
+  CertificateId:
+    Description: The ID of the existing certificate related to the domain name
     Type: String
 
 Resources:
@@ -15,25 +23,6 @@ Resources:
       ResponseHeadersPolicyConfig:
         Name: !Sub "${StackName}CustomSecurityHeadersPolicy"
         Comment: Security headers for CloudFront distribution
-        #Enable if cors issues
-        # CorsConfig:
-        #   CorsBehavior:
-        #     AccessControlAllowCredentials: true
-        #     AccessControlAllowOrigins:
-        #       Items:
-        #         - "*"
-        #     AccessControlAllowHeaders:
-        #       Items:
-        #         - "*"
-        #     AccessControlAllowMethods:
-        #         - GET
-        #         - POST
-        #         - OPTIONS
-        #         - PUT
-        #         - DELETE
-        #         - PATCH
-        #     AccessControlMaxAgeSec: 600
-        #     OriginOverride: true
         SecurityHeadersConfig:
           StrictTransportSecurity:
             AccessControlMaxAgeSec: 63072000
@@ -84,15 +73,15 @@ Resources:
       DistributionConfig:
         DefaultRootObject: index.html
         Origins:
-          - DomainName: !Sub "${StackName}.${DomainName}.s3-website-${AWS::Region}.amazonaws.com"
-            Id: !Sub "${StackName}S3Origin"
+          - Id: !Sub "${StackName}S3Origin"
+            DomainName: !Sub "${S3Bucket}.s3-website-${AWS::Region}.amazonaws.com"
             CustomOriginConfig:
               OriginProtocolPolicy: http-only
         ViewerCertificate:
           CloudFrontDefaultCertificate: true
         DefaultCacheBehavior:
           TargetOriginId: !Sub "${StackName}S3Origin"
-          ViewerProtocolPolicy: redirect-to-https
+          ViewerProtocolPolicy: redirect-to-https # Check what happens if there's no certificate, switch for allow-all
           AllowedMethods:
             - HEAD
             - GET
@@ -105,7 +94,7 @@ Resources:
         CacheBehaviors:
           - PathPattern: index.html
             TargetOriginId: !Sub "${StackName}S3Origin"
-            ViewerProtocolPolicy: redirect-to-https
+            ViewerProtocolPolicy: redirect-to-https 
             AllowedMethods:
               - HEAD
               - GET
@@ -129,11 +118,24 @@ Resources:
             ResponseHeadersPolicyId: !Ref SecurityHeadersPolicy
         Enabled: true
         PriceClass: PriceClass_All
+        Aliases:
+          - !Sub ${S3Bucket}
+        ViewerCertificate:
+          AcmCertificateArn: !Sub "arn:aws:acm:${AWS::Region}:447655722442:certificate/${CertificateId}"
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+          
+  WebsiteAliasRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Sub ${HostedZoneId}
+      Name: !Sub ${S3Bucket}
+      Type: CNAME
+      TTL: '86400'
+      ResourceRecords:
+        - !GetAtt CloudFrontDistribution.DomainName
 
 Outputs:
-  CloudFrontDistributionId:
-    Description: "CloudFront Distribution ID"
-    Value: !Ref CloudFrontDistribution
-  CloudFrontUrl:
-    Description: "CloudFront Distribution Url"
-    Value: !GetAtt CloudFrontDistribution.DomainName
+  Url:
+    Description: Public URL
+    Value: !Sub ${S3Bucket}

@@ -22,7 +22,7 @@ const mineBlockAt = async (rpc: string, timestamp: number) => {
   })
 }
 
-const mineBlocks = async (
+export const hardhatMineBlocks = async (
   rpc: string,
   count: number,
   startTimestamp?: number,
@@ -38,5 +38,5 @@ const mineBlocks = async (
   }
 }
 
-const rpc = process.env.L1RPC as string
-mineBlocks(rpc, 6600, 1722348025)
+// const rpc = process.env.L1RPC as string
+// mineBlocks(rpc, 6600, 1722348025)

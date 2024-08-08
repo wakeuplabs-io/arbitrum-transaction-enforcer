@@ -1,7 +1,6 @@
 import "dotenv/config"
-import { providers, Wallet } from 'ethers'
-import { assembleWithdraw, claimFunds, getClaimStatus } from "../src/withdraw"
-import { forceInclude, isForceIncludePossible, sendWithDelayedInbox } from "../src/delayed-inbox"
+import { BigNumber, providers, Wallet } from 'ethers'
+import { ArbitrumBridge, ArbitrumDelayedInbox } from "arbitrum-force-transaction"
 
 if (!process.env.DEVNET_PRIVKEY) {
     throw new Error('DEVNET_PRIVKEY env variable is required')
@@ -21,9 +20,16 @@ const l2Wallet = new Wallet(walletPrivateKey, l2Provider)
 
 const amountInWei = 1
 
+const arbDelayedInbox = new ArbitrumDelayedInbox(421614)
+const arbBridge = new ArbitrumBridge(l1Provider, l2Provider)
+
 async function initiateWithdraw() {
-    const bridgeTx = await assembleWithdraw(l2Provider, l2Wallet.address, amountInWei)
-    return await sendWithDelayedInbox(bridgeTx, l1Wallet, l2Wallet)
+    const bridgeTx = await arbBridge.assembleWithdraw(l2Wallet.address, BigNumber.from(amountInWei))
+    
+    const signedTx = await arbDelayedInbox.signChildTransaction(l2Wallet, bridgeTx)
+    const delayedInboxTx = await arbDelayedInbox.sendChildTransactionToParent(l1Wallet, signedTx)
+
+    return delayedInboxTx
 }
 
 // =========================================================================
@@ -36,7 +42,7 @@ async function initiateWithdraw() {
 // initiateWithdraw().then(console.log)
 
 // If the sequencer didn't take our tx for 24 hours, this should be true
-// isForceIncludePossible(l1Wallet, l2Wallet).then(console.log)
+arbDelayedInbox.canForceInclude(l1Wallet).then(console.log)
 
 // If the sequencer didn't take our tx for 24 hours, we can run this to force include it
 // forceInclude(l1Wallet, l2Wallet).then(console.log)

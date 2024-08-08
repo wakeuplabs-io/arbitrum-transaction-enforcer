@@ -21,6 +21,7 @@
     "@tanstack/router-devtools": "^1.46.2",
     "@tanstack/router-plugin": "^1.45.13",
     "@wagmi/cli": "2.1.15",
+    "arbitrum-force-transaction": "link:../arbitrum-force-transaction",
     "classnames": "2.5.1",
     "ethers": "5.7.2",
     "lucide-react": "^0.417.0",

@@ -4,6 +4,5 @@ version = 0.1
 [default.deploy.parameters]
 region = "us-east-1"
 resolve_s3 = true
-confirm_changeset = false
+confirm_changeset = true
 capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND"
-
