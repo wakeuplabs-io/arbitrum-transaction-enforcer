@@ -157,24 +157,11 @@ function PostComponent() {
               <span>Ethereum delayed inbox tx </span>
               <ArrowUpRight className="h-3 w-3" />
             </a>
-              {!canForce && claimStatus === ClaimStatus.PENDING &&
-                <AddToCalendarButton
-                  className="btn btn-sm space-x-1"
-                  event={{
-                    title: "Push forward your transaction",
-                    description: "Wait is over, if your transaction hasn't go through by now, you can force include it from Arbitrum connect.",
-                    startDate: new Date((transaction.timestamp) + 24 * ONE_HOUR),
-                    endDate: new Date((transaction.timestamp) + 25 * ONE_HOUR),
-                  }}
-                >
-                  <GoogleCalendarIcon className="h-4 w-4" />
-                  <span>Create reminder</span>
-                </AddToCalendarButton>
-              }</>}
+            </>}
           </StatusStep>
           <StatusStep
             done={claimStatus && [ClaimStatus.CLAIMED, ClaimStatus.CLAIMABLE].includes(claimStatus)}
-            active={transaction.delayedInboxHash && enableForce === undefined}
+            active={transaction.delayedInboxHash && claimStatus === ClaimStatus.PENDING}
             number={3}
             title="Force transaction"
             description="If after 24 hours your Arbitrum transaction hasn't been mined, you can push it forward manually with some extra fee in ethereum"
@@ -190,9 +177,23 @@ function PostComponent() {
                 </button>
               </>
             }
-            {!canConfirm && claimStatus === ClaimStatus.PENDING && remainingHours !== undefined && (<a className="text-sm font-semibold">
-              <span>{remainingHours} / 24 hs</span>
-            </a>)}
+            {claimStatus === ClaimStatus.PENDING && remainingHours !== undefined && (<>
+              <a className="text-sm font-semibold">
+                {remainingHours} / 24 hs
+              </a>
+              <AddToCalendarButton
+                className="btn btn-sm space-x-1"
+                event={{
+                  title: "Push forward your transaction",
+                  description: "Wait is over, if your transaction hasn't go through by now, you can force include it from Arbitrum connect.",
+                  startDate: new Date((transaction.timestamp) + 24 * ONE_HOUR),
+                  endDate: new Date((transaction.timestamp) + 25 * ONE_HOUR),
+                }}
+              >
+                <GoogleCalendarIcon className="h-4 w-4" />
+                <span>Create reminder</span>
+              </AddToCalendarButton>
+            </>)}
           </StatusStep>
 
           <StatusStep
@@ -213,11 +214,6 @@ function PostComponent() {
                 <ArrowUpRight className="h-3 w-3" />
               </a>
             }
-            {claimStatus === ClaimStatus.CLAIMED &&
-              <a className="text-sm flex space-x-1 items-center text-green-500 font-semibold">
-                <span>claimed</span>
-              </a>
-            }
             {claimStatus === ClaimStatus.PENDING &&
               <a className="text-sm flex space-x-1 items-center font-semibold">
                 <span>pending</span>
@@ -231,7 +227,7 @@ function PostComponent() {
             <a className="link">Learn More</a>
           </div>
         </div>
-      </div>
+      </div >
       <button
         type="button"
         className={cn("btn btn-primary")}
@@ -255,6 +251,6 @@ function PostComponent() {
       >
         Return home
       </button>
-    </div>
+    </div >
   );
 }
