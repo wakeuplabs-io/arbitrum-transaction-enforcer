@@ -1,5 +1,6 @@
 import { AddToCalendarButton } from "@/components/add-to-calendar";
 import { GoogleCalendarIcon } from "@/components/icons";
+import { StatusStep } from "@/components/transaction/status-step";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import { ONE_HOUR } from "@/lib/add-to-calendar";
 import { transactionsStorageService } from "@/lib/transactions";
@@ -120,13 +121,12 @@ function PostComponent() {
       {/* Steps */}
       <div className="flex flex-col text-start justify-between bg-gray-100 border border-neutral-200 rounded-2xl overflow-hidden">
         <div className="flex flex-col grow justify-between md:p-6 p-4 space-y-6">
-          <Step
+          <StatusStep
             done
             number={1}
             title="Initiate Withdraw"
             description="Your withdraw transaction in Arbitrum"
-            className="pt-2 md:flex md:space-x-4"
-          >
+            className="pt-2 md:flex md:space-x-4">
             <a
               href={`https://sepolia.arbiscan.io/tx/${transaction.bridgeHash}`}
               target="_blank"
@@ -135,8 +135,7 @@ function PostComponent() {
               <span>Arbitrum tx </span>
               <ArrowUpRight className="h-3 w-3" />
             </a>
-          </Step>
-
+          </StatusStep>
           <Step
             done={canConfirm !== undefined && !canConfirm}
             loading={canConfirm === undefined}
