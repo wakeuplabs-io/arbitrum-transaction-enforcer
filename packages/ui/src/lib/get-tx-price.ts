@@ -1,5 +1,6 @@
 import { BigNumber } from "ethers";
 import { formatEther, parseUnits } from "ethers/lib/utils";
+import { Address } from "viem";
 import { EstimateGasParameters } from "wagmi/actions";
 import {
   getPublicL1HttpsClient,
@@ -7,8 +8,8 @@ import {
 } from "./public-client";
 
 interface ITx {
-  to: `0x${string}`;
-  data: `0x${string}`;
+  to: Address;
+  data: Address;
 }
 
 //todo: to should be depend on mainnet/sepolia

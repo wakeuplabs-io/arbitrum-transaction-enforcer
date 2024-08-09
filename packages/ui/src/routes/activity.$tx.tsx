@@ -2,7 +2,6 @@ import { AddToCalendarButton } from "@/components/add-to-calendar";
 import { GoogleCalendarIcon } from "@/components/icons";
 import { StatusStep } from "@/components/transaction/status-step";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
-import { ONE_HOUR } from "@/lib/add-to-calendar";
 import { transactionsStorageService } from "@/lib/transactions";
 import { getL1BlockTimestamp } from "@/lib/tx-actions";
 import {
@@ -12,13 +11,14 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import cn from "classnames";
+import { addDays, addHours, intervalToDuration } from "date-fns";
 import { ArrowUpRight, Bell, CircleCheck } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { Address, formatEther } from "viem";
 
 export const Route = createFileRoute("/activity/$tx")({
   loader: async ({ params }) => {
-    const tx = transactionsStorageService.getByBridgeHash((params.tx) as Address ?? "0x");
+    const tx = transactionsStorageService.getByBridgeHash((params.tx as Address) ?? "0x");
     if (!tx) throw notFound();
     return tx;
   },
@@ -96,8 +96,10 @@ function PostComponent() {
   useEffect(() => {
     setCanConfirm(!transaction.delayedInboxHash)
     transaction.delayedInboxHash && getL1BlockTimestamp(transaction.delayedInboxHash).then(txTimestamp => {
-      const remaining = Math.floor(((txTimestamp + 24 * ONE_HOUR) - new Date().valueOf()) / ONE_HOUR);
-      setRemainingHours(remaining < 0 ? 0 : remaining);
+      const dueDate = addDays(txTimestamp, 1);
+      const remainingHours = intervalToDuration({ start: Date.now(), end: dueDate }).hours;
+      if (remainingHours === undefined) throw new Error("unexpected error calculating due time")
+      setRemainingHours(remainingHours < 0 ? 0 : remainingHours);
     })
   }, [transaction.delayedInboxHash])
 
@@ -189,8 +191,8 @@ function PostComponent() {
                 event={{
                   title: "Push forward your transaction",
                   description: "Wait is over, if your transaction hasn't go through by now, you can force include it from Arbitrum connect.",
-                  startDate: new Date((transaction.timestamp) + 24 * ONE_HOUR),
-                  endDate: new Date((transaction.timestamp) + 25 * ONE_HOUR),
+                  startDate: addHours(transaction.timestamp, 24),
+                  endDate: addHours(transaction.timestamp, 25),
                 }}
               >
                 <GoogleCalendarIcon className="h-4 w-4" />
