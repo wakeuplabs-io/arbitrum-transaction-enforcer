@@ -1,3 +1,4 @@
+import { ITxReq } from "@/lib/get-tx-price";
 import { getL1Chain, getL1Provider, getL2Chain, getL2Provider } from "@/lib/public-client";
 import {
   ChildToParentMessageStatus,
@@ -8,7 +9,7 @@ import {
 import { ArbSys__factory } from "@arbitrum/sdk/dist/lib/abi/factories/ArbSys__factory";
 import { ARB_SYS_ADDRESS } from "@arbitrum/sdk/dist/lib/dataEntities/constants";
 import "@rainbow-me/rainbowkit/styles.css";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { Address } from "viem";
 import { useAccount, useSwitchChain } from "wagmi";
 import { useEthersSigner } from "./useEthersSigner";
@@ -31,7 +32,8 @@ export default function useArbitrumBridge() {
     return switchChainAsync({ chainId })
   }
 
-  async function sendWithDelayedInbox(tx: any, childSigner: ethers.providers.JsonRpcSigner) {
+
+  async function sendWithDelayedInbox(tx: ITxReq, childSigner: ethers.providers.JsonRpcSigner) {
     await ensureChainId(childNetworkId);
     const inboxSdk = new InboxTools(signer!, l2Network);
 
@@ -63,15 +65,15 @@ export default function useArbitrumBridge() {
     } else return null;
   }
 
-  async function assembleWithdraw(from: string, amountInWei: string) {
+  async function assembleWithdraw(from: string, amountInWei: string): Promise<ITxReq> {
     // Assemble a generic withdraw transaction
     const arbsysIface = ArbSys__factory.createInterface();
-    const calldatal2 = arbsysIface.encodeFunctionData("withdrawEth", [from]);
+    const calldatal2 = arbsysIface.encodeFunctionData("withdrawEth", [from]) as Address;
 
     return {
       data: calldatal2,
       to: ARB_SYS_ADDRESS,
-      value: amountInWei,
+      value: BigNumber.from(amountInWei),
     };
   }
 
