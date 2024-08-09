@@ -9,6 +9,7 @@ import { ArbSys__factory } from "@arbitrum/sdk/dist/lib/abi/factories/ArbSys__fa
 import { ARB_SYS_ADDRESS } from "@arbitrum/sdk/dist/lib/dataEntities/constants";
 import "@rainbow-me/rainbowkit/styles.css";
 import { ethers } from "ethers";
+import { Address } from "viem";
 import { useAccount, useSwitchChain } from "wagmi";
 import { useEthersSigner } from "./useEthersSigner";
 
@@ -35,7 +36,7 @@ export default function useArbitrumBridge() {
     const inboxSdk = new InboxTools(signer!, l2Network);
 
     // extract l2's tx hash first so we can check if this tx executed on l2 later.
-    const l2Txhash = (await inboxSdk.signChildTx(tx, childSigner)) as `0x${string}`;
+    const l2Txhash = (await inboxSdk.signChildTx(tx, childSigner)) as Address;
 
     return l2Txhash;
   }
@@ -84,7 +85,7 @@ export default function useArbitrumBridge() {
     );
   }
 
-  async function pushChildTxToParent(l2SignedTx: `0x${string}`, parentSigner: ethers.providers.JsonRpcSigner) {
+  async function pushChildTxToParent(l2SignedTx: Address, parentSigner: ethers.providers.JsonRpcSigner) {
     await ensureChainId(parentChainId);
     const l2Network = getArbitrumNetwork(childNetworkId);
     const inboxSdk = new InboxTools(parentSigner, l2Network);
@@ -96,7 +97,7 @@ export default function useArbitrumBridge() {
 
     const inboxRec = await resultsL1.wait();
 
-    return inboxRec.transactionHash as `0x${string}`
+    return inboxRec.transactionHash as Address
   }
 
   async function getClaimStatus(l2TxnHash: string): Promise<ClaimStatus> {

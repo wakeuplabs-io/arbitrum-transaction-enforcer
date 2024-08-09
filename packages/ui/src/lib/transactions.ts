@@ -1,6 +1,8 @@
+import { Address } from "viem";
+
 export interface Transaction {
-  bridgeHash: `0x${string}`;
-  delayedInboxHash?: `0x${string}`;
+  bridgeHash: Address;
+  delayedInboxHash?: Address;
   amount: string;
   timestamp: number;
 }
@@ -12,7 +14,7 @@ export class TransactionsStorageService {
     return JSON.parse(localStorage.getItem(this.storageKey) ?? "[]");
   }
 
-  getByBridgeHash(hash: `0x${string}`): Transaction | null {
+  getByBridgeHash(hash: Address): Transaction | null {
     return (
       this.getAll().find(
         (t) => t.bridgeHash.toLowerCase() === hash.toLowerCase()

@@ -14,11 +14,11 @@ import {
 import cn from "classnames";
 import { ArrowUpRight, Bell, CircleCheck } from 'lucide-react';
 import { useEffect, useState } from "react";
-import { formatEther } from "viem";
+import { Address, formatEther } from "viem";
 
 export const Route = createFileRoute("/activity/$tx")({
   loader: async ({ params }) => {
-    const tx = transactionsStorageService.getByBridgeHash((params.tx) as `0x${string}` ?? "0x");
+    const tx = transactionsStorageService.getByBridgeHash((params.tx) as Address ?? "0x");
     if (!tx) throw notFound();
     return tx;
   },
@@ -38,11 +38,14 @@ function PostComponent() {
   const [canConfirm, setCanConfirm] = useState<boolean>();
   const [transaction, setTransaction] = useState(txParam);
   const [remainingHours, setRemainingHours] = useState<number>();
+  const [isConfirming, setIsConfirming] = useState<boolean>(false);
+
 
   const enableForce = !remainingHours && canForce && claimStatus && claimStatus === ClaimStatus.PENDING;
 
   function onConfirm() {
     if (!signer) return;
+    setIsConfirming(true);
     pushChildTxToParent(transaction.bridgeHash, signer)
       .then(inboxTx => {
         const updatedTx = { ...transaction, delayedInboxHash: inboxTx };
@@ -141,7 +144,7 @@ function PostComponent() {
             description="Send the Arbitrum withdraw transaction through the delayed inbox"
             className="pt-2 space-y-2 md:space-y-0 md:space-x-2 mb-4 flex items-start flex-col md:flex-row md:items-center"
           >
-            {canConfirm &&
+            {canConfirm && !isConfirming &&
               <button
                 onClick={onConfirm}
                 className="btn btn-primary btn-sm"
