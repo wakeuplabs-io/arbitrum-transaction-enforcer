@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 #root {
-  width:100%;
+  font-family: Inter;
+  width: 100%;
   display: flex;
   flex-grow: 1;
   text-align: center;
@@ -16,14 +17,14 @@ body {
 }
 /* fix rainbowkit container not taking full width */
 body div#root div[data-rk] {
-  width: 100%
+  width: 100%;
 }
 
 .remove-arrow::-webkit-inner-spin-button,
 .remove-arrow::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  -webkit-appearance: none;
+  margin: 0;
 }
 .remove-arrow {
-    -moz-appearance: textfield;
+  -moz-appearance: textfield;
 }
