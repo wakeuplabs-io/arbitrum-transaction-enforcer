@@ -1,11 +1,7 @@
-import { createPublicClient, http } from "viem";
-import { sepolia } from "viem/chains";
+import { getPublicL1HttpsClient } from "./public-client";
 
 export async function getL1BlockTimestamp(txHash: `0x${string}`) {
-  const ethClient = createPublicClient({
-    chain: sepolia,
-    transport: http(),
-  });
+  const ethClient = getPublicL1HttpsClient();
 
   const blockTimestamp = await ethClient
     .getTransaction({ hash: txHash })

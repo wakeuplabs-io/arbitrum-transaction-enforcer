@@ -31,7 +31,7 @@ export const Route = createFileRoute("/activity/$tx")({
 function PostComponent() {
   const txParam = Route.useLoaderData();
   const navigate = useNavigate();
-  const { signer, provider, forceInclude, isForceIncludePossible, getClaimStatus, claimFunds, pushChildTxToParent } = useArbitrumBridge();
+  const { signer, forceInclude, isForceIncludePossible, getClaimStatus, claimFunds, pushChildTxToParent } = useArbitrumBridge();
   const [canForce, setCanForce] = useState<boolean | undefined>(false);
   const [claimStatus, setClaimStatus] = useState<ClaimStatus>();
   const [canConfirm, setCanConfirm] = useState<boolean>();
@@ -63,8 +63,8 @@ function PostComponent() {
     );
   }
   function onClaim() {
-    if (!provider || !signer) return;
-    claimFunds(transaction.bridgeHash, provider, signer)
+    if (!signer) return;
+    claimFunds(transaction.bridgeHash, signer)
       .catch((e) =>
         window.alert(
           "Something went wrong, please try again. " + e.message
@@ -74,13 +74,13 @@ function PostComponent() {
 
 
   useEffect(() => {
-    if (!signer || !provider || canConfirm === undefined) return;
+    if (!signer || canConfirm === undefined) return;
     if (canConfirm) {
       setClaimStatus(ClaimStatus.PENDING)
       setCanForce(false);
     }
     else if (!claimStatus)
-      getClaimStatus(transaction.bridgeHash, provider, signer).then((x) => {
+      getClaimStatus(transaction.bridgeHash).then((x) => {
         setClaimStatus(x);
         if (x === ClaimStatus.PENDING) {
           setCanForce(undefined);
@@ -91,7 +91,7 @@ function PostComponent() {
         else
           setCanForce(false);
       })
-  }, [signer, provider, canConfirm, claimStatus]);
+  }, [signer, canConfirm, claimStatus]);
 
   useEffect(() => {
     setCanConfirm(!transaction.delayedInboxHash)

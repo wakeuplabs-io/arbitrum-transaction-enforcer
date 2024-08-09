@@ -1,3 +1,4 @@
+import { getL1Chain, getL1Provider, getL2Chain, getL2Provider } from "@/lib/public-client";
 import {
   ChildToParentMessageStatus,
   ChildTransactionReceipt,
@@ -9,8 +10,6 @@ import { ARB_SYS_ADDRESS } from "@arbitrum/sdk/dist/lib/dataEntities/constants";
 import "@rainbow-me/rainbowkit/styles.css";
 import { ethers } from "ethers";
 import { useAccount, useSwitchChain } from "wagmi";
-import { arbitrum, arbitrumSepolia, mainnet, sepolia } from "wagmi/chains";
-import { useEthersProvider } from "./useEthersProvider";
 import { useEthersSigner } from "./useEthersSigner";
 
 export enum ClaimStatus {
@@ -19,55 +18,38 @@ export enum ClaimStatus {
   CLAIMED = "CLAIMED",
 }
 
-const l2Networks = {
-  [mainnet.id]: arbitrum.id,
-  [sepolia.id]: arbitrumSepolia.id,
-} as const;
-
 export default function useArbitrumBridge() {
-  const parentChainId = sepolia.id;
-  const childNetworkId = l2Networks[parentChainId];
+  const parentChainId = getL1Chain().id;
+  const childNetworkId = getL2Chain().id;
   const { switchChainAsync } = useSwitchChain();
   const { address } = useAccount();
   const signer = useEthersSigner({ chainId: parentChainId });
-  const provider = useEthersProvider({ chainId: childNetworkId });
+  const l2Network = getArbitrumNetwork(childNetworkId)
 
-  async function ensureChainId(chainId: number) {
-    await switchChainAsync({ chainId });
+  async function ensureChainId(childSigner: ethers.providers.JsonRpcSigner, chainId: number) {
+    return childSigner.getChainId()
+      .then(x => { if (x !== chainId) switchChainAsync({ chainId }) })
   }
 
-  async function getSigner(
-    chainId: number
-  ): Promise<ethers.providers.JsonRpcSigner> {
-    await ensureChainId(chainId);
-
-    if (!signer) throw new Error("No signer");
-    return signer;
-  }
-
-  async function sendWithDelayedInbox(tx: any) {
-    await ensureChainId(childNetworkId);
-    const l2Network = getArbitrumNetwork(childNetworkId);
+  async function sendWithDelayedInbox(tx: any, childSigner: ethers.providers.JsonRpcSigner) {
+    await ensureChainId(childSigner, childNetworkId);
     const inboxSdk = new InboxTools(signer!, l2Network);
 
     // extract l2's tx hash first so we can check if this tx executed on l2 later.
-    const l2Signer = await getSigner(childNetworkId);
-    const l2Txhash = (await inboxSdk.signChildTx(tx, l2Signer)) as `0x${string}`;
+    const l2Txhash = (await inboxSdk.signChildTx(tx, childSigner)) as `0x${string}`;
 
     return l2Txhash;
   }
 
   async function isForceIncludePossible(parentSigner: ethers.providers.JsonRpcSigner) {
-    await ensureChainId(parentChainId);
-    const l2Network = getArbitrumNetwork(childNetworkId);
+    await ensureChainId(parentSigner, parentChainId);
     const inboxSdk = new InboxTools(parentSigner, l2Network);
 
     return !!(await inboxSdk.getForceIncludableEvent());
   }
 
   async function forceInclude(parentSigner: ethers.providers.JsonRpcSigner) {
-    await ensureChainId(parentChainId);
-    const l2Network = getArbitrumNetwork(childNetworkId);
+    await ensureChainId(parentSigner, parentChainId);
     const inboxTools = new InboxTools(parentSigner, l2Network);
 
     if (!(await inboxTools.getForceIncludableEvent())) {
@@ -93,18 +75,18 @@ export default function useArbitrumBridge() {
     };
   }
 
-  async function initiateWithdraw(amountInWei: string) {
+  async function initiateWithdraw(amountInWei: string, childSigner: ethers.providers.JsonRpcSigner) {
     if (!address) {
       throw new Error("No address available");
     }
 
     return await sendWithDelayedInbox(
-      await assembleWithdraw(address, amountInWei)
+      await assembleWithdraw(address, amountInWei), childSigner
     );
   }
 
   async function pushChildTxToParent(l2SignedTx: `0x${string}`, parentSigner: ethers.providers.JsonRpcSigner) {
-    await ensureChainId(parentChainId);
+    await ensureChainId(parentSigner, parentChainId);
     const l2Network = getArbitrumNetwork(childNetworkId);
     const inboxSdk = new InboxTools(parentSigner, l2Network);
 
@@ -118,7 +100,10 @@ export default function useArbitrumBridge() {
     return inboxRec.transactionHash as `0x${string}`
   }
 
-  async function getClaimStatus(l2TxnHash: string, childProvider: ethers.providers.JsonRpcProvider, parentSigner: ethers.providers.JsonRpcSigner): Promise<ClaimStatus> {
+  async function getClaimStatus(l2TxnHash: string): Promise<ClaimStatus> {
+    const childProvider = getL2Provider();
+    const parentProvider = getL1Provider()
+
     if (!l2TxnHash) {
       throw new Error(
         "Provide a transaction hash of an L2 transaction that sends an L2 to L1 message"
@@ -137,7 +122,7 @@ export default function useArbitrumBridge() {
 
     // In principle, a single transaction could trigger any number of outgoing messages; the common case will be there's only one.
     // We assume there's only one / just grad the first one.
-    const messages = await l2Receipt.getChildToParentMessages(parentSigner);
+    const messages = await l2Receipt.getChildToParentMessages(parentProvider);
     const l2ToL1Msg = messages[0];
 
     // Check if already executed
@@ -157,7 +142,9 @@ export default function useArbitrumBridge() {
     }
   }
 
-  async function claimFunds(l2TxnHash: string, childProvider: ethers.providers.JsonRpcProvider, parentSigner: ethers.providers.JsonRpcSigner) {
+  async function claimFunds(l2TxnHash: string, parentSigner: ethers.providers.JsonRpcSigner) {
+    const childProvider = getL2Provider();
+
     if (!l2TxnHash) {
       throw new Error(
         "Provide a transaction hash of an L2 transaction that sends an L2 to L1 message"
@@ -198,7 +185,6 @@ export default function useArbitrumBridge() {
     pushChildTxToParent,
     getClaimStatus,
     claimFunds,
-    provider,
     signer
   };
 }

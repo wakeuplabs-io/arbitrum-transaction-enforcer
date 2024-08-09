@@ -43,15 +43,15 @@ function WithdrawScreen() {
   const [withdrawPrice, setWithdrawPrice] = useState<string>("");
   const [confirmWithdrawPrice, setConfirmWithdrawPrice] = useState<string>("");
   const [claimPrice, setClaimPrice] = useState<string>("");
-  const { initiateWithdraw } = useArbitrumBridge();
+  const { initiateWithdraw, signer } = useArbitrumBridge();
 
   function onContinue() {
     setLoading(true);
-    initiateWithdraw(String(amountInWei))
+    signer && initiateWithdraw(amountInWei, signer)
       .then((l2Txhash) => {
         const tx: Transaction = {
           bridgeHash: l2Txhash,
-          amount: String(amountInWei),
+          amount: amountInWei,
           timestamp: Date.now(),
         };
         transactionsStorageService.create(tx);
