@@ -76,11 +76,7 @@ function PostComponent() {
 
   useEffect(() => {
     if (!signer || canConfirm === undefined) return;
-    if (canConfirm) {
-      setClaimStatus(ClaimStatus.PENDING)
-      setCanForce(false);
-    }
-    else if (!claimStatus)
+    if (transaction.delayedInboxHash && !claimStatus)
       getClaimStatus(transaction.bridgeHash).then((x) => {
         setClaimStatus(x);
         if (x === ClaimStatus.PENDING) {
@@ -102,6 +98,7 @@ function PostComponent() {
     })
   }, [transaction.delayedInboxHash])
 
+  console.log("claimStatus: ", claimStatus);
   return (
     <div className="flex flex-col gap-6 max-w-xl mx-auto">
       <div className="flex flex-col items-center">
@@ -120,13 +117,13 @@ function PostComponent() {
 
       {/* Steps */}
       <div className="flex flex-col text-start justify-between bg-gray-100 border border-neutral-200 rounded-2xl overflow-hidden">
-        <div className="flex flex-col grow justify-between md:p-6 p-4 space-y-6">
+        <div className="flex flex-col grow justify-between md:p-6">
           <StatusStep
             done
             number={1}
             title="Initiate Withdraw"
             description="Your withdraw transaction in Arbitrum"
-            className="pt-2 md:flex md:space-x-4">
+            className="pt-2 md:flex md:space-x-4 mb-4">
             <a
               href={`https://sepolia.arbiscan.io/tx/${transaction.bridgeHash}`}
               target="_blank"
@@ -142,7 +139,8 @@ function PostComponent() {
             number={2}
             title="Confirm Withdraw"
             description="Send the Arbitrum withdraw transaction through the delayed inbox"
-            className="pt-2 space-y-2 md:space-y-0 md:space-x-2 flex items-start flex-col md:flex-row md:items-center">
+            className="pt-2 space-y-2 md:space-y-0 md:space-x-2 mb-4 flex items-start flex-col md:flex-row md:items-center"
+          >
             {canConfirm &&
               <button
                 onClick={onConfirm}
@@ -154,7 +152,7 @@ function PostComponent() {
             {!canConfirm && <><a
               href={`https://sepolia.etherscan.io/tx/${transaction.delayedInboxHash}`}
               target="_blank"
-              className="link text-sm flex space-x-1 items-center"
+              className="link text-sm flex space-x-1 items-center "
             >
               <span>Ethereum delayed inbox tx </span>
               <ArrowUpRight className="h-3 w-3" />
@@ -176,11 +174,11 @@ function PostComponent() {
           </StatusStep>
           <StatusStep
             done={claimStatus && [ClaimStatus.CLAIMED, ClaimStatus.CLAIMABLE].includes(claimStatus)}
-            active={enableForce === undefined}
+            active={transaction.delayedInboxHash && enableForce === undefined}
             number={3}
             title="Force transaction"
             description="If after 24 hours your Arbitrum transaction hasn't been mined, you can push it forward manually with some extra fee in ethereum"
-            className="pt-2 space-y-2 md:space-y-0 md:space-x-2 flex items-start flex-col md:flex-row md:items-center"
+            className="pt-2 space-y-2 md:space-y-0 md:space-x-2 mb-4 flex items-start flex-col md:flex-row md:items-center"
           >
             {enableForce &&
               <>
@@ -197,9 +195,9 @@ function PostComponent() {
             </a>)}
           </StatusStep>
 
-          <Step
+          <StatusStep
             done={claimStatus === ClaimStatus.CLAIMED}
-            loading={claimStatus === undefined}
+            active={transaction.delayedInboxHash && claimStatus === undefined}
             number={4}
             className="pt-2"
             title="Claim funds on Ethereum"
@@ -225,7 +223,7 @@ function PostComponent() {
                 <span>pending</span>
               </a>
             }
-          </Step>
+          </StatusStep>
         </div>
         <div className="bg-gray-200 px-4 py-3">
           <div className="text-sm">
@@ -259,45 +257,4 @@ function PostComponent() {
       </button>
     </div>
   );
-}
-
-function Step(props: {
-  number: number;
-  title: string;
-  description: string;
-  children?: React.ReactNode;
-  className?: string;
-  done?: boolean;
-  loading?: boolean
-}) {
-  return (
-    <div className={"flex items-center justify-between"}>
-      <div className="flex space-x-3">
-        {!props.done &&
-          <div className="h-5 min-w-5 mt-1 flex justify-center items-center rounded-full border-2 border-gray-800">
-            {<span className="text-xs">{props.number}</span>}
-          </div>
-        }
-        {props.done && <div className="h-5 min-w-5 mt-1 flex justify-center items-center rounded-full border-2 border-green-500 text-green-500">
-          {<span className="text-xs">✓</span>}
-        </div>}
-        <div>
-          <h2 className={cn("text-lg", { "text-green-500": props.done })}>{props.title}</h2>
-          <p className="text-sm">{props.description}</p>
-          {props.loading && <Spinner />}
-          {!props.loading &&
-            <div className={props.className}>{props.children}</div>
-          }
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Spinner() {
-  return (
-    <div
-      className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-primary"
-      role="status">
-    </div>)
 }

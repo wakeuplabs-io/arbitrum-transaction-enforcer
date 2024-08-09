@@ -26,13 +26,12 @@ export default function useArbitrumBridge() {
   const signer = useEthersSigner({ chainId: parentChainId });
   const l2Network = getArbitrumNetwork(childNetworkId)
 
-  async function ensureChainId(childSigner: ethers.providers.JsonRpcSigner, chainId: number) {
-    return childSigner.getChainId()
-      .then(x => { if (x !== chainId) switchChainAsync({ chainId }) })
+  async function ensureChainId(chainId: number) {
+    return switchChainAsync({ chainId })
   }
 
   async function sendWithDelayedInbox(tx: any, childSigner: ethers.providers.JsonRpcSigner) {
-    await ensureChainId(childSigner, childNetworkId);
+    await ensureChainId(childNetworkId);
     const inboxSdk = new InboxTools(signer!, l2Network);
 
     // extract l2's tx hash first so we can check if this tx executed on l2 later.
@@ -42,14 +41,14 @@ export default function useArbitrumBridge() {
   }
 
   async function isForceIncludePossible(parentSigner: ethers.providers.JsonRpcSigner) {
-    await ensureChainId(parentSigner, parentChainId);
+    await ensureChainId(parentChainId);
     const inboxSdk = new InboxTools(parentSigner, l2Network);
 
     return !!(await inboxSdk.getForceIncludableEvent());
   }
 
   async function forceInclude(parentSigner: ethers.providers.JsonRpcSigner) {
-    await ensureChainId(parentSigner, parentChainId);
+    await ensureChainId(parentChainId);
     const inboxTools = new InboxTools(parentSigner, l2Network);
 
     if (!(await inboxTools.getForceIncludableEvent())) {
@@ -86,7 +85,7 @@ export default function useArbitrumBridge() {
   }
 
   async function pushChildTxToParent(l2SignedTx: `0x${string}`, parentSigner: ethers.providers.JsonRpcSigner) {
-    await ensureChainId(parentSigner, parentChainId);
+    await ensureChainId(parentChainId);
     const l2Network = getArbitrumNetwork(childNetworkId);
     const inboxSdk = new InboxTools(parentSigner, l2Network);
 
