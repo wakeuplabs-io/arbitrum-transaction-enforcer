@@ -136,23 +136,20 @@ function PostComponent() {
               <ArrowUpRight className="h-3 w-3" />
             </a>
           </StatusStep>
-          <Step
-            done={canConfirm !== undefined && !canConfirm}
-            loading={canConfirm === undefined}
+          <StatusStep
+            done={!!transaction.delayedInboxHash}
+            active={!transaction.delayedInboxHash && canConfirm !== undefined}
             number={2}
             title="Confirm Withdraw"
             description="Send the Arbitrum withdraw transaction through the delayed inbox"
-            className="pt-2 space-y-2 md:space-y-0 md:space-x-2 flex items-start flex-col md:flex-row md:items-center"
-          >
+            className="pt-2 space-y-2 md:space-y-0 md:space-x-2 flex items-start flex-col md:flex-row md:items-center">
             {canConfirm &&
-              <>
-                <button
-                  onClick={onConfirm}
-                  className="btn btn-primary btn-sm"
-                >
-                  Confirm
-                </button>
-              </>
+              <button
+                onClick={onConfirm}
+                className="btn btn-primary btn-sm"
+              >
+                Confirm
+              </button>
             }
             {!canConfirm && <><a
               href={`https://sepolia.etherscan.io/tx/${transaction.delayedInboxHash}`}
@@ -176,10 +173,10 @@ function PostComponent() {
                   <span>Create reminder</span>
                 </AddToCalendarButton>
               }</>}
-          </Step>
-          <Step
-            done={(claimStatus === ClaimStatus.CLAIMED && !canForce) || claimStatus === ClaimStatus.CLAIMABLE}
-            loading={enableForce === undefined}
+          </StatusStep>
+          <StatusStep
+            done={claimStatus && [ClaimStatus.CLAIMED, ClaimStatus.CLAIMABLE].includes(claimStatus)}
+            active={enableForce === undefined}
             number={3}
             title="Force transaction"
             description="If after 24 hours your Arbitrum transaction hasn't been mined, you can push it forward manually with some extra fee in ethereum"
@@ -198,7 +195,7 @@ function PostComponent() {
             {!canConfirm && claimStatus === ClaimStatus.PENDING && remainingHours !== undefined && (<a className="text-sm font-semibold">
               <span>{remainingHours} / 24 hs</span>
             </a>)}
-          </Step>
+          </StatusStep>
 
           <Step
             done={claimStatus === ClaimStatus.CLAIMED}
