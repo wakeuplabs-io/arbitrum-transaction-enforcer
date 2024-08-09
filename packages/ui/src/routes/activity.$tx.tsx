@@ -197,7 +197,7 @@ function PostComponent() {
 
           <StatusStep
             done={claimStatus === ClaimStatus.CLAIMED}
-            active={transaction.delayedInboxHash && claimStatus === undefined}
+            active={transaction.delayedInboxHash && (claimStatus === undefined || claimStatus === ClaimStatus.CLAIMABLE)}
             number={4}
             className="pt-2"
             title="Claim funds on Ethereum"

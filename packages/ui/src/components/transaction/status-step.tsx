@@ -50,20 +50,20 @@ function Filler(props: { done: boolean }) {
 
 function StatusIcon(props: { done: boolean, active: boolean, number: number }) {
     if (props.done) return (
-        <div className="h-5 w-5 mt-1.5 flex justify-center items-center rounded-full border-2 border-green-500 text-white bg-green-500">
+        <div className="h-5 w-5 mt-1 flex justify-center items-center rounded-full border-2 border-green-500 text-white bg-green-500">
             {<Check strokeWidth={3} color="white" className="mt-0.5" />}
         </div>
     )
     if (props.active)
         return (
-            <div className="h-5 w-5 mt-1.5 flex justify-center items-center rounded-full border-2 border-gray-600 bg-gray-600">
+            <div className="h-5 w-5 mt-1 flex justify-center items-center rounded-full border-2 border-gray-600 bg-gray-600">
                 {<LoaderCircle strokeWidth={3} color="white" size={20} className="animate-spin" />}
             </div>
         )
 
     if (!props.active)
         return (
-            <div className="h-5 min-w-5 mt-1.5 flex justify-center items-center rounded-full border-2 border-gray-400">
+            <div className="h-5 min-w-5 mt-1 flex justify-center items-center rounded-full border-2 border-gray-400">
                 {<span className="text-xs text-gray-400 font-semibold">{props.number}</span>}
             </div>
         )
