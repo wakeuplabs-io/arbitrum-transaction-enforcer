@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@synthetixio/synpress": "^3.7.3",
+    "@tanstack/eslint-plugin-query": "5.51.15",
     "@tanstack/router-cli": "1.45.13",
     "@types/react": "18.2.66",
     "@types/react-dom": "18.2.22",
