@@ -2,6 +2,7 @@ import EthereumIcon from "@/assets/ethereum-icon.svg";
 import { TransactionStatus } from "@/components/transaction/status";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
 import { createFileRoute } from "@tanstack/react-router";
+import { formatEther } from "ethers/lib/utils";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/activity/")({
@@ -32,7 +33,7 @@ function ActivityScreen() {
                 <img src={EthereumIcon} />
                 <div className="">Withdrawal</div>
               </div>
-              <div className="flex items-center">0.0005 ETH</div>
+              <div className="flex items-center">{formatEther(BigInt(x.amount))} ETH</div>
             </div>
             <div className="collapse-content">
               <TransactionStatus tx={x} isActive={false} />
