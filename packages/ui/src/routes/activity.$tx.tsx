@@ -45,7 +45,7 @@ function PostComponent() {
       </div>
 
       {/* Steps */}
-      <TransactionStatus tx={tx}
+      <TransactionStatus tx={tx} isActive={true}
       />
       <button
         type="button"

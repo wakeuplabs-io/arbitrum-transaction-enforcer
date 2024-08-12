@@ -1,14 +1,16 @@
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
+import useOnScreen from "@/hooks/useOnScreen";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
 import { getL1BlockTimestamp } from "@/lib/tx-actions";
 import { addDays, addHours, intervalToDuration } from "date-fns";
 import { ArrowUpRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AddToCalendarButton } from "../add-to-calendar";
 import { GoogleCalendarIcon } from "../icons";
 import { StatusStep } from "./status-step";
 
-export function TransactionStatus(props: { tx: Transaction }) {
+
+export function TransactionStatus(props: { tx: Transaction, isActive: boolean }) {
     const { signer, forceInclude, isForceIncludePossible, getClaimStatus, claimFunds, pushChildTxToParent } = useArbitrumBridge();
     const [canForce, setCanForce] = useState<boolean | undefined>(false);
     const [claimStatus, setClaimStatus] = useState<ClaimStatus>();
@@ -16,6 +18,8 @@ export function TransactionStatus(props: { tx: Transaction }) {
     const [remainingHours, setRemainingHours] = useState<number>();
     const [isConfirming, setIsConfirming] = useState<boolean>(false);
     const [transaction, setTransaction] = useState<Transaction>(props.tx);
+    const ref = useRef<HTMLDivElement>(null)
+    const isVisible = useOnScreen(ref)
 
 
     const enableForce = !remainingHours && canForce && claimStatus && claimStatus === ClaimStatus.PENDING;
@@ -53,9 +57,14 @@ export function TransactionStatus(props: { tx: Transaction }) {
             )
     }
 
+    useEffect(() => {
+        if (!isVisible) return;
+        console.log("visible tx: ", props.tx.bridgeHash)
+    }, [isVisible])
 
     useEffect(() => {
-        if (!signer || canConfirm === undefined) return;
+        if (!signer || canConfirm === undefined || !isVisible) return;
+
         if (props.tx.delayedInboxHash && !claimStatus)
             getClaimStatus(props.tx.bridgeHash).then((x) => {
                 setClaimStatus(x);
@@ -68,9 +77,11 @@ export function TransactionStatus(props: { tx: Transaction }) {
                 else
                     setCanForce(false);
             })
-    }, [signer, canConfirm, claimStatus]);
+    }, [signer, canConfirm, claimStatus, isVisible]);
 
     useEffect(() => {
+        if (!isVisible) return;
+
         setCanConfirm(!props.tx.delayedInboxHash)
         props.tx.delayedInboxHash && getL1BlockTimestamp(props.tx.delayedInboxHash).then(txTimestamp => {
             const dueDate = addDays(txTimestamp, 1);
@@ -78,11 +89,11 @@ export function TransactionStatus(props: { tx: Transaction }) {
             if (remainingHours === undefined) throw new Error("unexpected error calculating due time")
             setRemainingHours(remainingHours < 0 ? 0 : remainingHours);
         })
-    }, [transaction.delayedInboxHash])
+    }, [transaction.delayedInboxHash, isVisible])
 
     return (
         <div className="flex flex-col text-start justify-between bg-gray-100 border border-neutral-200 rounded-2xl overflow-hidden">
-            <div className="flex flex-col grow justify-between md:p-6">
+            <div ref={ref} className="flex flex-col grow justify-between md:p-6">
                 <StatusStep
                     done
                     number={1}
