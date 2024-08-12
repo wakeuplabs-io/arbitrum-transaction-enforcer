@@ -1,5 +1,5 @@
 import EthIcon from "@/assets/ethereum-icon.svg";
-import useArbitrumBridge from "@/hooks/useArbitrumBridge";
+import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import {
   getMockedL1ClaimTxGasLimit,
   getMockedL2WithdrawPrice,
@@ -76,7 +76,8 @@ function WithdrawScreen() {
           const tx: Transaction = {
             bridgeHash: l2Txhash,
             amount: amountInWei,
-            timestamp: Date.now(),
+            confirmed: false,
+            claimStatus: ClaimStatus.PENDING
           };
           transactionsStorageService.create(tx);
           navigate({ to: `/activity/${tx.bridgeHash}` });

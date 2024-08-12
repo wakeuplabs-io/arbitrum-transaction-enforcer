@@ -87,13 +87,13 @@ export default function useArbitrumBridge() {
     );
   }
 
-  async function pushChildTxToParent(l2SignedTx: Address, parentSigner: ethers.providers.JsonRpcSigner) {
+  async function pushChildTxToParent(props: { l2SignedTx: Address, parentSigner: ethers.providers.JsonRpcSigner }) {
     await ensureChainId(parentChainId);
     const l2Network = getArbitrumNetwork(childNetworkId);
-    const inboxSdk = new InboxTools(parentSigner, l2Network);
+    const inboxSdk = new InboxTools(props.parentSigner, l2Network);
 
     // send tx to l1 delayed inbox
-    const resultsL1 = await inboxSdk.sendChildSignedTx(l2SignedTx);
+    const resultsL1 = await inboxSdk.sendChildSignedTx(props.l2SignedTx);
     if (resultsL1 == null)
       throw new Error(`Failed to send tx to l1 delayed inbox!`);
 
