@@ -144,25 +144,25 @@ export default function useArbitrumBridge() {
     }
   }
 
-  async function claimFunds(l2TxnHash: string, parentSigner: ethers.providers.JsonRpcSigner) {
+  async function claimFunds(props: { l2TxnHash: string, parentSigner: ethers.providers.JsonRpcSigner }) {
     const childProvider = getL2Provider();
 
-    if (!l2TxnHash) {
+    if (!props.l2TxnHash) {
       throw new Error(
         "Provide a transaction hash of an L2 transaction that sends an L2 to L1 message"
       );
     }
-    if (!l2TxnHash.startsWith("0x") || l2TxnHash.trim().length != 66) {
-      throw new Error(`Hmm, ${l2TxnHash} doesn't look like a txn hash...`);
+    if (!props.l2TxnHash.startsWith("0x") || props.l2TxnHash.trim().length != 66) {
+      throw new Error(`Hmm, ${props.l2TxnHash} doesn't look like a txn hash...`);
     }
 
     // First, let's find the Arbitrum txn from the txn hash provided
-    const receipt = await childProvider.getTransactionReceipt(l2TxnHash);
+    const receipt = await childProvider.getTransactionReceipt(props.l2TxnHash);
     const l2Receipt = new ChildTransactionReceipt(receipt);
 
     // In principle, a single transaction could trigger any number of outgoing messages; the common case will be there's only one.
     // We assume there's only one / just grad the first one.
-    const messages = await l2Receipt.getChildToParentMessages(parentSigner);
+    const messages = await l2Receipt.getChildToParentMessages(props.parentSigner);
     const l2ToL1Msg = messages[0];
 
     // Check if already executed

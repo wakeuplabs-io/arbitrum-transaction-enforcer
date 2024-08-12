@@ -24,18 +24,16 @@ export function TransactionStatus(props: {
         pushChildTxToParent,
     } = useArbitrumBridge();
     const [remainingHours, setRemainingHours] = useState<number>();
-    const [isClaiming, setIsClaiming] = useState<boolean>(false);
-    const [isForcing, setIsForcing] = useState<boolean>(false);
     const [transaction, setTransaction] = useState<Transaction>(props.tx);
     const ref = useRef<HTMLDivElement>(null);
     const isVisible = useOnScreen(ref);
 
     const forceIncludeTx = useMutation({
         mutationFn: forceInclude,
-        onSuccess: () => setIsForcing(false),
         onError: (e) =>
             window.alert("Something went wrong, please try again. " + e.message),
     });
+
     const confirmTx = useMutation({
         mutationFn: pushChildTxToParent,
         onSuccess: (inboxTx) => {
@@ -48,6 +46,19 @@ export function TransactionStatus(props: {
         onError: (e) =>
             window.alert("Something went wrong, please try again. " + e.message),
     });
+
+    const claimFundsTx = useMutation({
+        mutationFn: claimFunds,
+        onSuccess: () => {
+            updateTx({
+                ...transaction,
+                claimStatus: ClaimStatus.CLAIMED,
+            });
+        },
+        onError: (e) =>
+            window.alert("Something went wrong, please try again. " + e.message),
+    });
+
     const { data: claimStatusData, isFetching: fetchingClaimStatus } = useQuery({
         queryKey: ["claimStatus", transaction.bridgeHash],
         queryFn: () => getClaimStatus(transaction.bridgeHash!),
@@ -116,30 +127,16 @@ export function TransactionStatus(props: {
     function onForce() {
         if (!signer) return;
 
-        setIsForcing(true);
         forceIncludeTx.mutate(signer);
     }
     function onClaim() {
         if (!signer) return;
 
-        setIsClaiming(true);
-        claimFunds(transaction.bridgeHash, signer)
-            .then(() => {
-                updateTx({ ...transaction, claimStatus: ClaimStatus.CLAIMED });
-                setIsClaiming(false);
-            })
-            .catch((e) =>
-                window.alert("Something went wrong, please try again. " + e.message)
-            );
+        claimFundsTx.mutate({
+            l2TxnHash: transaction.bridgeHash,
+            parentSigner: signer,
+        });
     }
-
-    useEffect(() => {
-        if (!isVisible || !transaction.confirmed || !transaction.delayedInboxHash)
-            return;
-
-        if (!transaction.timestamp) {
-        }
-    }, [transaction.delayedInboxHash, isVisible]);
 
     return (
         <div className="flex flex-col text-start justify-between bg-gray-100 border border-neutral-200 rounded-2xl overflow-hidden">
@@ -170,9 +167,14 @@ export function TransactionStatus(props: {
                     className="pt-2 space-y-2 md:space-y-0 md:space-x-2 mb-4 flex items-start flex-col md:flex-row md:items-center"
                 >
                     {!transaction.delayedInboxHash &&
-                        !confirmTx.isPending &&
                         !fetchingDelayedTxTimestamp && (
-                            <button onClick={onConfirm} className="btn btn-primary btn-sm">
+                            <button
+                                onClick={onConfirm}
+                                className={cn("btn btn-primary btn-sm", {
+                                    "opacity-50": confirmTx.isPending,
+                                })}
+                                disabled={confirmTx.isPending}
+                            >
                                 Confirm
                             </button>
                         )}
@@ -200,7 +202,7 @@ export function TransactionStatus(props: {
                         transaction.claimStatus === ClaimStatus.PENDING &&
                         !fetchingClaimStatus
                     }
-                    running={isForcing || fetchingForceIncludeStatus}
+                    running={forceIncludeTx.isPending || fetchingForceIncludeStatus}
                     number={3}
                     title="Force transaction"
                     description="If after 24 hours your Arbitrum transaction hasn't been mined, you can push it forward manually with some extra fee in ethereum"
@@ -243,7 +245,7 @@ export function TransactionStatus(props: {
                         (transaction.claimStatus === ClaimStatus.PENDING &&
                             fetchingClaimStatus)
                     }
-                    running={isClaiming || fetchingClaimStatus}
+                    running={claimFundsTx.isPending || fetchingClaimStatus}
                     number={4}
                     className="pt-2"
                     title="Claim funds on Ethereum"
@@ -254,8 +256,10 @@ export function TransactionStatus(props: {
                         !fetchingClaimStatus && (
                             <button
                                 onClick={onClaim}
-                                className={cn("btn btn-primary btn-sm", { "opacity-50": isClaiming, })}
-                                disabled={isClaiming}
+                                className={cn("btn btn-primary btn-sm", {
+                                    "opacity-50": claimFundsTx.isPending,
+                                })}
+                                disabled={claimFundsTx.isPending}
                             >
                                 Claim funds{" "}
                             </button>
