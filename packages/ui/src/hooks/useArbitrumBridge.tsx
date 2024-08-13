@@ -9,7 +9,7 @@ import {
 import { ArbSys__factory } from "@arbitrum/sdk/dist/lib/abi/factories/ArbSys__factory";
 import { ARB_SYS_ADDRESS } from "@arbitrum/sdk/dist/lib/dataEntities/constants";
 import "@rainbow-me/rainbowkit/styles.css";
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import { Address } from "viem";
 import { useAccount, useSwitchChain } from "wagmi";
 import { useEthersSigner } from "./useEthersSigner";
@@ -73,7 +73,7 @@ export default function useArbitrumBridge() {
     return {
       data: calldatal2,
       to: ARB_SYS_ADDRESS,
-      value: BigNumber.from(amountInWei),
+      value: BigInt(amountInWei),
     };
   }
 
@@ -87,13 +87,13 @@ export default function useArbitrumBridge() {
     );
   }
 
-  async function pushChildTxToParent(l2SignedTx: Address, parentSigner: ethers.providers.JsonRpcSigner) {
+  async function pushChildTxToParent(props: { l2SignedTx: Address, parentSigner: ethers.providers.JsonRpcSigner }) {
     await ensureChainId(parentChainId);
     const l2Network = getArbitrumNetwork(childNetworkId);
-    const inboxSdk = new InboxTools(parentSigner, l2Network);
+    const inboxSdk = new InboxTools(props.parentSigner, l2Network);
 
     // send tx to l1 delayed inbox
-    const resultsL1 = await inboxSdk.sendChildSignedTx(l2SignedTx);
+    const resultsL1 = await inboxSdk.sendChildSignedTx(props.l2SignedTx);
     if (resultsL1 == null)
       throw new Error(`Failed to send tx to l1 delayed inbox!`);
 
@@ -144,25 +144,25 @@ export default function useArbitrumBridge() {
     }
   }
 
-  async function claimFunds(l2TxnHash: string, parentSigner: ethers.providers.JsonRpcSigner) {
+  async function claimFunds(props: { l2TxnHash: string, parentSigner: ethers.providers.JsonRpcSigner }) {
     const childProvider = getL2Provider();
 
-    if (!l2TxnHash) {
+    if (!props.l2TxnHash) {
       throw new Error(
         "Provide a transaction hash of an L2 transaction that sends an L2 to L1 message"
       );
     }
-    if (!l2TxnHash.startsWith("0x") || l2TxnHash.trim().length != 66) {
-      throw new Error(`Hmm, ${l2TxnHash} doesn't look like a txn hash...`);
+    if (!props.l2TxnHash.startsWith("0x") || props.l2TxnHash.trim().length != 66) {
+      throw new Error(`Hmm, ${props.l2TxnHash} doesn't look like a txn hash...`);
     }
 
     // First, let's find the Arbitrum txn from the txn hash provided
-    const receipt = await childProvider.getTransactionReceipt(l2TxnHash);
+    const receipt = await childProvider.getTransactionReceipt(props.l2TxnHash);
     const l2Receipt = new ChildTransactionReceipt(receipt);
 
     // In principle, a single transaction could trigger any number of outgoing messages; the common case will be there's only one.
     // We assume there's only one / just grad the first one.
-    const messages = await l2Receipt.getChildToParentMessages(parentSigner);
+    const messages = await l2Receipt.getChildToParentMessages(props.parentSigner);
     const l2ToL1Msg = messages[0];
 
     // Check if already executed

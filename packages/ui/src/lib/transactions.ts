@@ -1,10 +1,13 @@
+import { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import { Address } from "viem";
 
 export interface Transaction {
   bridgeHash: Address;
-  delayedInboxHash?: Address;
   amount: string;
-  timestamp: number;
+  confirmed: boolean;
+  timestamp?: number;
+  delayedInboxHash?: Address;
+  claimStatus: ClaimStatus;
 }
 
 export class TransactionsStorageService {
