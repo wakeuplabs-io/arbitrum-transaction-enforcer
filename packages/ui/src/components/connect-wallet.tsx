@@ -34,9 +34,11 @@ export default function CustomConnectButton(
                 Wrong network
               </button>
             ) : (
-              <button onClick={openAccountModal} type="button" {...btnProps}>
-                {props.chainStatus === "icon" && chain.hasIcon && <img src={chain.iconUrl} width={28} alt="chain icon" />}{account.displayName}
-              </button>
+              <div className="tooltip tooltip-bottom flex items-center justify-evenly" data-tip={chain.name}>
+                <button onClick={openAccountModal} type="button" {...btnProps}>
+                  {props.chainStatus === "icon" && chain.hasIcon && <img src={chain.iconUrl} width={28} alt="chain icon" />}{account.displayName}
+                </button>
+              </div>
             )}
           </div>
         );
