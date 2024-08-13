@@ -91,7 +91,7 @@ function HomeScreen() {
           </div>
           <hr className="w-full pb-6" />
           <div className="flex justify-between items-center w-full">
-            <div className={cn("flex items-center gap-4")}>
+            <div className="flex items-center gap-4">
               <img src={EthereumIcon} alt="ethereum icon" />
               <div className="flex flex-col text-left">
                 <div className={cn("text-primary-700 font-bold text-xl duration-200 ease-in-out", { "text-red-600": error?.balance })}>ETH</div>
