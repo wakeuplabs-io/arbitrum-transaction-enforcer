@@ -9,8 +9,6 @@ export default {
       colors: {
         "primary-700": "#15202E",
         "neutral-50": "#F9FAFB",
-        "btn-disabled": "red",
-        disabled: "red",
       },
       width: {
         150: "37.5rem",
@@ -36,8 +34,6 @@ export default {
         custom: {
           primary: "#213147",
           neutral: colors.neutral[200],
-          "btn-disabled": "red",
-          disabled: "red",
         },
       },
     ],
