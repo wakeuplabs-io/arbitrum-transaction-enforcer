@@ -15,7 +15,8 @@ export default function useArbitrumBalance() {
         const balance = ethers.utils.formatEther(rawBalance);
 
         setBalanceOnArbitrum(balance);
-      }
+      } else
+        setBalanceOnArbitrum("-")
     };
 
     getBalance();

@@ -13,12 +13,12 @@ export default function Topbar() {
             <b>Arbitrum</b> Connect
           </span>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex space-x-3 text-primary">
           <Link to="/activity" className="btn btn-outline rounded-2xl hover:border-gray-300 hover:text-gray-500 w-[185px]">
             <Bell size={18} />
             My activity
           </Link>
-          <CustomConnectButton id="topbar-connect-wallet" className="btn rounded-2xl w-[185px]" chainStatus="icon" >
+          <CustomConnectButton id="topbar-connect-wallet" className="btn rounded-2xl w-[185px] hover:border-gray-300 hover:text-gray-500" chainStatus="icon" tooltip>
             <WalletIcon className="h-5 w-5" />
             Connect
           </CustomConnectButton>
