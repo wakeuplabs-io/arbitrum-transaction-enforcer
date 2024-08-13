@@ -36,7 +36,7 @@ export default function CustomConnectButton(
             ) : (
               <div className="tooltip tooltip-bottom flex items-center justify-evenly" data-tip={chain.name}>
                 <button onClick={openAccountModal} type="button" {...btnProps}>
-                  {props.chainStatus === "icon" && chain.hasIcon && <img src={chain.iconUrl} width={28} alt="chain icon" />}{account.displayName}
+                  {props.chainStatus === "icon" && chain.hasIcon && <img src={chain.iconUrl} width={20} alt="chain icon" />}{account.displayName}
                 </button>
               </div>
             )}
