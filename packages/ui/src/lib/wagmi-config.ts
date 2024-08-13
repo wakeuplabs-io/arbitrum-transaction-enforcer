@@ -1,9 +1,17 @@
-import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import arbitrumIcon from "@/assets/arbitrum-icon.svg";
+import ethereumIcon from "@/assets/ethereum-icon.svg";
+import { Chain, connectorsForWallets } from "@rainbow-me/rainbowkit";
 import { metaMaskWallet } from "@rainbow-me/rainbowkit/wallets";
 import { createConfig, http } from "wagmi";
 import { arbitrumSepolia, sepolia } from "wagmi/chains";
 
-export const chains = [arbitrumSepolia, sepolia] as const;
+export const chains: readonly [Chain, ...Chain[]] = [
+  { ...arbitrumSepolia, iconUrl: arbitrumIcon },
+  {
+    ...sepolia,
+    iconUrl: ethereumIcon,
+  },
+];
 const config = createConfig({
   chains,
   transports: {

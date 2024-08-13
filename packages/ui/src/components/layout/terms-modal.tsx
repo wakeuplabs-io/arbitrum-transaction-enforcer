@@ -11,7 +11,7 @@ export default function TermsModal({
 }) {
   return (
     <Modal isOpen={isOpen}>
-      <img src={ArbitrumConnectIcon} />
+      <img src={ArbitrumConnectIcon} alt="arbitrum icon" />
       <div className="text-xl mt-3">Welcome to Arbitrum Connect</div>
       <div className="text-lg">
         We ensure your transactions are processed even if the Arbitrum Sequencer

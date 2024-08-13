@@ -87,7 +87,7 @@ function WithdrawScreen() {
       {/* amount */}
       <div className="flex items-center justify-between bg-neutral-50 border border-neutral-200 rounded-2xl md:p-6 p-4">
         <div className="flex items-center gap-3">
-          <img src={EthIcon} />
+          <img src={EthIcon} alt="ethereum icon" />
           <div className="flex items-end space-x-1">
             <div
               data-test-id="withdraw-amount"

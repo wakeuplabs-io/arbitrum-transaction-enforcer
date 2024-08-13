@@ -40,7 +40,7 @@ function HomeScreen() {
       <div className="flex flex-col gap-6">
         <div className="flex text-left justify-between items-center bg-neutral-50 border border-neutral-200 rounded-2xl p-5">
           <div className="flex flex-row gap-3 items-start">
-            <img src={ArbitrumIcon} />
+            <img src={ArbitrumIcon} alt="arbitrum icon" />
             <div>
               <div className="md:text-sm text-xs text-neutral-500">From</div>
               <div className="font-semibold text-2xl hidden md:block">
@@ -51,7 +51,7 @@ function HomeScreen() {
           </div>
           <CircleArrowRight strokeWidth={1.5} />
           <div className="flex flex-row gap-3 items-start">
-            <img src={EthereumIcon} />
+            <img src={EthereumIcon} alt="ethereum icon" />
             <div>
               <div className="text-xs md:text-sm text-neutral-500">To</div>
               <div className="font-semibold text-2xl hidden md:block">
@@ -75,7 +75,7 @@ function HomeScreen() {
           <hr className="w-full pb-6" />
           <div className="flex justify-between items-center w-full">
             <div className="flex items-center gap-4">
-              <img src={EthereumIcon} />
+              <img src={EthereumIcon} alt="ethereum icon" />
               <div className="flex flex-col text-left">
                 <div className="font-bold text-xl">ETH</div>
                 <div className="text-neutral-500">
@@ -97,7 +97,7 @@ function HomeScreen() {
         <div className="flex justify-between items-center flex-col gap-4 bg-neutral-50 border border-neutral-200 rounded-2xl p-5">
           <div className="w-full flex justify-between items-center">
             <div className="flex gap-3">
-              <img src={WalletIcon} />
+              <img src={WalletIcon} alt="wallet icon" />
               <div>Address</div>
             </div>
             <CustomConnectButton className="btn btn-outline rounded-full btn-sm hover:text-gray-500">
