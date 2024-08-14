@@ -4,8 +4,7 @@ import { Address } from "viem";
 export interface Transaction {
   bridgeHash: Address;
   amount: string;
-  confirmed: boolean;
-  timestamp?: number;
+  delayedInboxTimestamp?: number;
   delayedInboxHash?: Address;
   claimStatus: ClaimStatus;
 }

@@ -1,16 +1,27 @@
-import { Address } from "viem";
-import { getPublicL1HttpsClient } from "./public-client";
+import { Address, PublicClient } from "viem";
 
-export async function getL1BlockTimestamp(txHash: Address) {
-  const ethClient = getPublicL1HttpsClient();
-
-  const blockTimestamp = await ethClient
+export async function getTimestampFromTxHash(
+  txHash: Address,
+  client: PublicClient
+) {
+  const blockTimestamp = await client
     .getTransaction({ hash: txHash })
     .then((tx) =>
-      ethClient
+      client
         .getBlock({ blockNumber: tx.blockNumber })
         .then((x) => Number(x.timestamp) * 1000)
     );
+
+  return blockTimestamp;
+}
+
+export async function getTimestampFromBlock(
+  blockNumber: bigint,
+  client: PublicClient
+) {
+  const blockTimestamp = await client
+    .getBlock({ blockNumber: blockNumber })
+    .then((x) => Number(x.timestamp) * 1000);
 
   return blockTimestamp;
 }

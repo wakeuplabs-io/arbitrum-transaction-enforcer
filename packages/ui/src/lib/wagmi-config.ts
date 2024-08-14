@@ -4,6 +4,9 @@ import { metaMaskWallet } from "@rainbow-me/rainbowkit/wallets";
 import { createConfig, http } from "wagmi";
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from "wagmi/chains";
 
+export const l1Chain = envParsed().IS_TESTNET ? sepolia : mainnet;
+export const l2Chain = envParsed().IS_TESTNET ? arbitrumSepolia : arbitrum;
+
 const testChains = [arbitrumSepolia, sepolia] as const;
 const testTransports = {
   [arbitrumSepolia.id]: http(),
@@ -14,6 +17,7 @@ const transports = {
   [arbitrum.id]: http(),
   [mainnet.id]: http(),
 };
+
 const connectors = connectorsForWallets(
   [
     {

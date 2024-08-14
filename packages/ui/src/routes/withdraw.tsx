@@ -1,4 +1,5 @@
 import EthIcon from "@/assets/ethereum-icon.svg";
+import { useWeb3ClientContext } from "@/contexts/web3-client-context";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import {
   getMockedL1ClaimTxGasLimit,
@@ -37,6 +38,7 @@ export const Route = createFileRoute("/withdraw")({
 
 function WithdrawScreen() {
   const navigate = useNavigate();
+  const { parentProvider, childProvider } = useWeb3ClientContext();
   const { amount: amountInWei } = Route.useSearch();
 
   useEffect(() => {
@@ -54,17 +56,17 @@ function WithdrawScreen() {
 
   const { data: withdrawPrice, isFetching: withdrawPriceFetching } = useQuery({
     queryKey: ["withdrawPrice"],
-    queryFn: getMockedL2WithdrawPrice,
+    queryFn: () => getMockedL2WithdrawPrice(childProvider),
     refetchOnWindowFocus: true,
   });
   const { data: confirmPrice, isFetching: confirmPriceFetching } = useQuery({
     queryKey: ["confirmPrice"],
-    queryFn: getMockedSendL1MsgPrice,
+    queryFn: () => getMockedSendL1MsgPrice(parentProvider),
     refetchOnWindowFocus: true,
   });
   const { data: claimPrice, isFetching: claimPriceFetching } = useQuery({
     queryKey: ["claimPrice"],
-    queryFn: getMockedL1ClaimTxGasLimit,
+    queryFn: () => getMockedL1ClaimTxGasLimit(parentProvider),
     refetchOnWindowFocus: true,
   });
 
@@ -76,7 +78,6 @@ function WithdrawScreen() {
           const tx: Transaction = {
             bridgeHash: l2Txhash,
             amount: amountInWei,
-            confirmed: false,
             claimStatus: ClaimStatus.PENDING
           };
           transactionsStorageService.create(tx);

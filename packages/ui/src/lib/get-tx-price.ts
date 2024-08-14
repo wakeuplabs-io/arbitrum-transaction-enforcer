@@ -1,7 +1,6 @@
 import { BigNumber, ethers } from "ethers";
 import { formatEther, parseUnits } from "ethers/lib/utils";
 import { Address } from "viem";
-import { getL1Provider, getL2Provider } from "./public-client";
 
 export interface ITxReq extends ethers.providers.TransactionRequest {
   to: Address;
@@ -22,9 +21,13 @@ export const MockL2WithdrawTx: ITxReq = {
 };
 export const L1ClaimTxGasLimit = BigNumber.from(111016);
 
-export async function getL1TxPriceFromGasLimit(gasLimit: BigNumber) {
-  const ethClient = getL1Provider();
-  const gasPrice = await ethClient.getGasPrice().then((x) => BigNumber.from(x));
+export async function getParentTxPriceFromGasLimit(
+  gasLimit: BigNumber,
+  parentProvider: ethers.providers.JsonRpcProvider
+) {
+  const gasPrice = await parentProvider
+    .getGasPrice()
+    .then((x) => BigNumber.from(x));
   const L1BaseFee = parseUnits("1500000000", "wei");
   const L1TxPrice = formatEther(
     BigNumber.from(gasLimit).mul(gasPrice.add(L1BaseFee))
@@ -32,10 +35,14 @@ export async function getL1TxPriceFromGasLimit(gasLimit: BigNumber) {
 
   return L1TxPrice;
 }
-export async function getL1TxPrice(tx: ethers.providers.TransactionRequest) {
-  const ethClient = getL1Provider();
-  const gasPrice = await ethClient.getGasPrice().then((x) => BigNumber.from(x));
-  const estimated = await ethClient.estimateGas(tx);
+export async function getL1TxPrice(
+  tx: ethers.providers.TransactionRequest,
+  parentProvider: ethers.providers.JsonRpcProvider
+) {
+  const gasPrice = await parentProvider
+    .getGasPrice()
+    .then((x) => BigNumber.from(x));
+  const estimated = await parentProvider.estimateGas(tx);
   const L1BaseFee = parseUnits("1500000000", "wei");
   const L1TxPrice = formatEther(
     BigNumber.from(estimated).mul(gasPrice.add(L1BaseFee))
@@ -44,21 +51,32 @@ export async function getL1TxPrice(tx: ethers.providers.TransactionRequest) {
   return L1TxPrice;
 }
 
-export async function getL2TxPrice(tx: ethers.providers.TransactionRequest) {
-  const arbClient = getL2Provider();
-  const gasPrice = await arbClient.getGasPrice().then((x) => BigNumber.from(x));
-  const estimated = await arbClient.estimateGas(tx);
+export async function getChildTxPrice(
+  tx: ethers.providers.TransactionRequest,
+  childProvider: ethers.providers.JsonRpcProvider
+) {
+  const gasPrice = await childProvider
+    .getGasPrice()
+    .then((x) => BigNumber.from(x));
+  const estimated = await childProvider.estimateGas(tx);
   const L2TxPrice = formatEther(BigNumber.from(estimated).mul(gasPrice));
 
   return L2TxPrice;
 }
-export async function getMockedL2WithdrawPrice() {
-  return getL2TxPrice(MockL2WithdrawTx);
+export async function getMockedL2WithdrawPrice(
+  childProvider: ethers.providers.JsonRpcProvider
+) {
+  return getChildTxPrice(MockL2WithdrawTx, childProvider);
 }
 
-export async function getMockedSendL1MsgPrice() {
-  return getL2TxPrice(MockL1SendL2MessageTx);
+export async function getMockedSendL1MsgPrice(
+  parentProvider: ethers.providers.JsonRpcProvider
+) {
+  return getL1TxPrice(MockL1SendL2MessageTx, parentProvider);
 }
-export async function getMockedL1ClaimTxGasLimit() {
-  return getL1TxPriceFromGasLimit(L1ClaimTxGasLimit);
+
+export async function getMockedL1ClaimTxGasLimit(
+  parentProvider: ethers.providers.JsonRpcProvider
+) {
+  return getParentTxPriceFromGasLimit(L1ClaimTxGasLimit, parentProvider);
 }
