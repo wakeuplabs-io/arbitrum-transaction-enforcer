@@ -17,7 +17,6 @@ export function TransactionStatus(props: {
     tx: Transaction;
     isActive: boolean;
 }) {
-
     const {
         signer,
         forceInclude,
@@ -25,14 +24,15 @@ export function TransactionStatus(props: {
         getClaimStatus,
         claimFunds,
         pushChildTxToParent,
+        getL2toL1Msg,
     } = useArbitrumBridge();
 
     const [remainingHours, setRemainingHours] = useState<number>();
     const [transaction, setTransaction] = useState<Transaction>(props.tx);
     const ref = useRef<HTMLDivElement>(null);
     const isVisible = useOnScreen(ref);
-    const { publicParentClient, parentProvider, childProvider } = useWeb3ClientContext();
-
+    const { publicParentClient, childProvider } = useWeb3ClientContext();
+    const [triggered, setTriggered] = useState(false);
 
     const forceIncludeTx = useMutation({
         mutationFn: forceInclude,
@@ -52,13 +52,21 @@ export function TransactionStatus(props: {
             window.alert("Something went wrong, please try again. " + e.message),
     });
 
-    const { data: claimStatusData, isFetching: fetchingClaimStatus } = useQuery({
-        queryKey: ["claimStatus", transaction.bridgeHash],
-        queryFn: () => getClaimStatus(transaction.bridgeHash!, childProvider, parentProvider),
+    const { data: l2ToL1Msg, isFetching: fetchingL2ToL1Msg } = useQuery({
+        queryKey: ["l2ToL1Msg", transaction.bridgeHash],
+        queryFn: () => getL2toL1Msg(transaction.bridgeHash, childProvider, signer!),
         enabled:
-            isVisible &&
+            triggered &&
+            !!signer &&
             !!transaction.delayedInboxTimestamp &&
             transaction.claimStatus !== ClaimStatus.CLAIMED,
+        staleTime: Infinity,
+    });
+
+    const { data: claimStatusData, isFetching: fetchingClaimStatus } = useQuery({
+        queryKey: ["claimStatus", transaction.bridgeHash],
+        queryFn: () => getClaimStatus(childProvider, l2ToL1Msg!),
+        enabled: !!l2ToL1Msg,
     });
 
     const { data: canForceInclude, isFetching: fetchingForceIncludeStatus } =
@@ -66,18 +74,24 @@ export function TransactionStatus(props: {
             queryKey: ["forceIncludeStatus", transaction.delayedInboxHash],
             queryFn: () => isForceIncludePossible(signer!),
             enabled:
-                isVisible &&
+                triggered &&
                 !!signer &&
                 remainingHours === 0 &&
                 transaction.claimStatus === ClaimStatus.PENDING,
         });
 
-    const { data: delayedInboxTxTimestamp, isFetching: fetchingInboxTxTimestamp } =
-        useQuery({
-            queryKey: ["delayedInboxTimestamp", transaction.delayedInboxHash],
-            queryFn: () => getTimestampFromTxHash(transaction.delayedInboxHash!, publicParentClient),
-            enabled: isVisible && transaction.delayedInboxHash && !transaction.delayedInboxTimestamp,
-        });
+    const {
+        data: delayedInboxTxTimestamp,
+        isFetching: fetchingInboxTxTimestamp,
+    } = useQuery({
+        queryKey: ["delayedInboxTimestamp", transaction.delayedInboxHash],
+        queryFn: () =>
+            getTimestampFromTxHash(transaction.delayedInboxHash!, publicParentClient),
+        enabled:
+            triggered &&
+            transaction.delayedInboxHash !== undefined &&
+            !transaction.delayedInboxTimestamp,
+    });
 
     function recalculateRemainingHours(timestamp: number) {
         const dueDate = addDays(timestamp, 1);
@@ -86,7 +100,9 @@ export function TransactionStatus(props: {
             end: dueDate,
         }).hours;
 
-        setRemainingHours((!remainingHours || remainingHours < 0) ? 0 : remainingHours);
+        setRemainingHours(
+            !remainingHours || remainingHours < 0 ? 0 : remainingHours
+        );
     }
 
     function updateTx(updatedTx: Transaction) {
@@ -97,22 +113,27 @@ export function TransactionStatus(props: {
     function onConfirm() {
         if (!signer) return;
 
-        confirmTx.mutate({
-            l2SignedTx: transaction.bridgeHash,
-            parentSigner: signer,
-        }, {
-            onSuccess: (inboxTx) => {
-                let updatedTx = {
-                    ...transaction,
-                    delayedInboxHash: inboxTx.hash as Address
-                };
-                updateTx(updatedTx);
-                inboxTx.wait().then(() => updateTx({
-                    ...updatedTx,
-                    delayedInboxTimestamp: Date.now()
-                }));
+        confirmTx.mutate(
+            {
+                l2SignedTx: transaction.bridgeHash,
+                parentSigner: signer,
             },
-        });
+            {
+                onSuccess: (inboxTx) => {
+                    let updatedTx = {
+                        ...transaction,
+                        delayedInboxHash: inboxTx.hash as Address,
+                    };
+                    updateTx(updatedTx);
+                    inboxTx.wait().then(() =>
+                        updateTx({
+                            ...updatedTx,
+                            delayedInboxTimestamp: Date.now(),
+                        })
+                    );
+                },
+            }
+        );
     }
 
     function onForce() {
@@ -124,31 +145,41 @@ export function TransactionStatus(props: {
     function onClaim() {
         if (!signer) return;
 
-        claimFundsTx.mutate({
-            l2TxnHash: transaction.bridgeHash,
-            parentSigner: signer,
-            childProvider
-        }, {
-            onSuccess: () => {
-                updateTx({
-                    ...transaction,
-                    claimStatus: ClaimStatus.CLAIMED,
-                });
+        claimFundsTx.mutate(
+            {
+                l2ToL1Msg,
+                parentSigner: signer,
+                childProvider,
             },
-        });
+            {
+                onSuccess: () => {
+                    updateTx({
+                        ...transaction,
+                        claimStatus: ClaimStatus.CLAIMED,
+                    });
+                },
+            }
+        );
     }
 
     useEffect(() => {
         if (transaction.delayedInboxTimestamp)
             recalculateRemainingHours(transaction.delayedInboxTimestamp);
         else if (delayedInboxTxTimestamp)
-            updateTx({ ...transaction, delayedInboxTimestamp: delayedInboxTxTimestamp });
+            updateTx({
+                ...transaction,
+                delayedInboxTimestamp: delayedInboxTxTimestamp,
+            });
     }, [delayedInboxTxTimestamp, transaction.delayedInboxTimestamp]);
 
     useEffect(() => {
         if (claimStatusData && claimStatusData !== ClaimStatus.PENDING)
             updateTx({ ...transaction, claimStatus: claimStatusData });
     }, [claimStatusData]);
+
+    useEffect(() => {
+        if (!triggered && isVisible) setTriggered(true);
+    }, [isVisible]);
 
     return (
         <div className="flex flex-col text-start justify-between bg-gray-100 border border-neutral-200 rounded-2xl overflow-hidden">
@@ -171,24 +202,32 @@ export function TransactionStatus(props: {
                 </StatusStep>
                 <StatusStep
                     done={!!transaction.delayedInboxTimestamp}
-                    active={!transaction.delayedInboxHash || !transaction.delayedInboxTimestamp}
-                    running={(confirmTx.isPending || fetchingInboxTxTimestamp) && !transaction.delayedInboxTimestamp}
+                    active={
+                        !transaction.delayedInboxHash || !transaction.delayedInboxTimestamp
+                    }
+                    running={
+                        confirmTx.isPending ||
+                        fetchingInboxTxTimestamp ||
+                        (transaction.delayedInboxHash && !transaction.delayedInboxTimestamp)
+                    }
                     number={2}
                     title="Confirm Withdraw"
                     description="Send the Arbitrum withdraw transaction through the delayed inbox"
                     className="pt-2 space-y-2 md:space-y-0 md:space-x-2 mb-4 flex items-start flex-col md:flex-row md:items-center"
                 >
-                    {!transaction.delayedInboxHash && !transaction.delayedInboxTimestamp && !fetchingInboxTxTimestamp && (
-                        <button
-                            onClick={onConfirm}
-                            className={cn("btn btn-primary btn-sm", {
-                                "opacity-50": confirmTx.isPending,
-                            })}
-                            disabled={confirmTx.isPending}
-                        >
-                            Confirm
-                        </button>
-                    )}
+                    {!transaction.delayedInboxHash &&
+                        !transaction.delayedInboxTimestamp &&
+                        !fetchingInboxTxTimestamp && (
+                            <button
+                                onClick={onConfirm}
+                                className={cn("btn btn-primary btn-sm", {
+                                    "opacity-50": confirmTx.isPending,
+                                })}
+                                disabled={confirmTx.isPending}
+                            >
+                                Confirm
+                            </button>
+                        )}
                     {transaction.delayedInboxHash && (
                         <a
                             href={`https://sepolia.etherscan.io/tx/${transaction.delayedInboxHash}`}
@@ -204,12 +243,14 @@ export function TransactionStatus(props: {
                     done={
                         [ClaimStatus.CLAIMED, ClaimStatus.CLAIMABLE].includes(
                             transaction.claimStatus
-                        ) && !fetchingClaimStatus
+                        ) &&
+                        (!fetchingClaimStatus || !fetchingL2ToL1Msg)
                     }
                     active={
                         !!transaction.delayedInboxTimestamp &&
                         transaction.claimStatus === ClaimStatus.PENDING &&
-                        !fetchingClaimStatus
+                        !fetchingClaimStatus &&
+                        !fetchingL2ToL1Msg
                     }
                     running={forceIncludeTx.isPending || fetchingForceIncludeStatus}
                     number={3}
@@ -252,9 +293,12 @@ export function TransactionStatus(props: {
                     active={
                         transaction.claimStatus === ClaimStatus.CLAIMABLE ||
                         (transaction.claimStatus === ClaimStatus.PENDING &&
-                            fetchingClaimStatus)
+                            fetchingClaimStatus) ||
+                        fetchingL2ToL1Msg
                     }
-                    running={claimFundsTx.isPending || fetchingClaimStatus}
+                    running={
+                        claimFundsTx.isPending || fetchingClaimStatus || fetchingL2ToL1Msg
+                    }
                     number={4}
                     className="pt-2"
                     title="Claim funds on Ethereum"
@@ -262,7 +306,8 @@ export function TransactionStatus(props: {
                     lastStep
                 >
                     {transaction.claimStatus === ClaimStatus.CLAIMABLE &&
-                        !fetchingClaimStatus && (
+                        !fetchingClaimStatus &&
+                        !fetchingL2ToL1Msg && (
                             <button
                                 onClick={onClaim}
                                 className={cn("btn btn-primary btn-sm", {

@@ -4,8 +4,6 @@ import { ethers } from "ethers";
 import React, { createContext, useContext } from "react";
 import { createPublicClient, http, PublicClient } from "viem";
 
-
-// type WalletContextValue = WalletHookResult;
 type Web3ClientContextValue = {
 	publicParentClient: PublicClient,
 	publicChildClient: PublicClient,
@@ -35,7 +33,6 @@ export const Web3ClientProvider: React.FC<Web3ClientProviderProps> = ({ children
 		envParsed().HTTPS_ARB_RPC_URL
 	);
 
-
 	const values = {
 		publicParentClient, publicChildClient, parentProvider, childProvider
 	}
@@ -47,7 +44,7 @@ export const useWeb3ClientContext = (): Web3ClientContextValue => {
 	const context = useContext(Web3ClientContext);
 
 	if (!context) {
-		throw new Error("useWeb3ClientContext not initialized :(");
+		throw new Error("Web3ClientContext failed to initialize");
 	}
 
 	return context;

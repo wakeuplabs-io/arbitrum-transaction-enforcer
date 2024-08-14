@@ -1,5 +1,7 @@
+import EthereumIconCheck from "@/assets/ethereum-icon-check.svg";
 import EthereumIcon from "@/assets/ethereum-icon.svg";
 import { TransactionStatus } from "@/components/transaction/status";
+import { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
 import { createFileRoute } from "@tanstack/react-router";
 import { formatEther } from "ethers/lib/utils";
@@ -30,7 +32,9 @@ function ActivityScreen() {
             <input type="radio" name="accordion" />
             <div className="collapse-title text-lg flex items-center justify-between after:traslate-y-0">
               <div className="flex gap-3 items-center">
-                <img src={EthereumIcon} />
+                {x.claimStatus === ClaimStatus.CLAIMED ?
+                  <img src={EthereumIconCheck} /> :
+                  <img src={EthereumIcon} />}
                 <div className="">Withdrawal</div>
               </div>
               <div className="flex items-center">{formatEther(BigInt(x.amount))} ETH</div>

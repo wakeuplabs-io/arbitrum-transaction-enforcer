@@ -2,6 +2,7 @@ import { ITxReq } from "@/lib/get-tx-price";
 import { l1Chain, l2Chain } from "@/lib/wagmi-config";
 import {
   ChildToParentMessageStatus,
+  ChildToParentMessageWriter,
   ChildTransactionReceipt,
   getArbitrumNetwork,
   InboxTools,
@@ -102,28 +103,33 @@ export default function useArbitrumBridge() {
     return childTx;
   }
 
-  async function getClaimStatus(l2TxnHash: string, childProvider: ethers.providers.JsonRpcProvider, parentProvider: ethers.providers.JsonRpcProvider): Promise<ClaimStatus> {
-
-    if (!l2TxnHash) {
-      throw new Error(
-        "Provide a transaction hash of an L2 transaction that sends an L2 to L1 message"
-      );
-    }
-    if (!l2TxnHash.startsWith("0x") || l2TxnHash.trim().length != 66) {
+  async function getL2toL1Msg(l2TxnHash: string, childProvider: ethers.providers.JsonRpcProvider, parentSigner: ethers.providers.JsonRpcSigner) {
+    if (!l2TxnHash.startsWith("0x") || l2TxnHash.trim().length != 66)
       throw new Error(`Hmm, ${l2TxnHash} doesn't look like a txn hash...`);
-    }
 
     // First, let's find the Arbitrum txn from the txn hash provided
     const receipt = await childProvider.getTransactionReceipt(l2TxnHash);
-    if (receipt === null) {
-      return ClaimStatus.PENDING;
-    }
-    const l2Receipt = new ChildTransactionReceipt(receipt);
+    if (receipt === null)
+      return undefined
 
+    const l2Receipt = new ChildTransactionReceipt(receipt);
     // In principle, a single transaction could trigger any number of outgoing messages; the common case will be there's only one.
     // We assume there's only one / just grad the first one.
-    const messages = await l2Receipt.getChildToParentMessages(parentProvider);
-    const l2ToL1Msg = messages[0];
+    const messages = await l2Receipt.getChildToParentMessages(parentSigner);
+
+    return messages[0];
+  }
+
+  async function getClaimStatus(childProvider: ethers.providers.JsonRpcProvider, l2ToL1Msg: ChildToParentMessageWriter): Promise<ClaimStatus> {
+    if (!l2ToL1Msg) {
+      throw new Error(
+        "Provide an L2 transaction that sends an L2 to L1 message or the message itself"
+      );
+    }
+
+    if (!l2ToL1Msg)
+      return ClaimStatus.PENDING;
+
     // Check if already executed
     if (
       (await l2ToL1Msg.status(childProvider)) ==
@@ -140,36 +146,24 @@ export default function useArbitrumBridge() {
     }
   }
 
-  async function claimFunds(props: { l2TxnHash: string, parentSigner: ethers.providers.JsonRpcSigner, childProvider: ethers.providers.JsonRpcProvider }) {
+  async function claimFunds(props: { l2ToL1Msg?: ChildToParentMessageWriter, parentSigner: ethers.providers.JsonRpcSigner, childProvider: ethers.providers.JsonRpcProvider }) {
 
-    if (!props.l2TxnHash) {
+    if (!props.l2ToL1Msg) {
       throw new Error(
-        "Provide a transaction hash of an L2 transaction that sends an L2 to L1 message"
+        "Provide an L2 transaction that sends an L2 to L1 message"
       );
     }
-    if (!props.l2TxnHash.startsWith("0x") || props.l2TxnHash.trim().length != 66) {
-      throw new Error(`Hmm, ${props.l2TxnHash} doesn't look like a txn hash...`);
-    }
-
-    // First, let's find the Arbitrum txn from the txn hash provided
-    const receipt = await props.childProvider.getTransactionReceipt(props.l2TxnHash);
-    const l2Receipt = new ChildTransactionReceipt(receipt);
-
-    // In principle, a single transaction could trigger any number of outgoing messages; the common case will be there's only one.
-    // We assume there's only one / just grad the first one.
-    const messages = await l2Receipt.getChildToParentMessages(props.parentSigner);
-    const l2ToL1Msg = messages[0];
 
     // Check if already executed
     if (
-      (await l2ToL1Msg.status(props.childProvider)) ==
+      (await props.l2ToL1Msg.status(props.childProvider)) ==
       ChildToParentMessageStatus.EXECUTED
     ) {
       return null;
     }
 
     // Now that its confirmed and not executed, we can execute our message in its outbox entry.
-    const res = await l2ToL1Msg.execute(props.childProvider);
+    const res = await props.l2ToL1Msg.execute(props.childProvider);
     const rec = await res.wait();
 
     return rec;
@@ -182,6 +176,7 @@ export default function useArbitrumBridge() {
     pushChildTxToParent,
     getClaimStatus,
     claimFunds,
+    getL2toL1Msg,
     signer
   };
 }
