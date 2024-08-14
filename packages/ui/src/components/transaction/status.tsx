@@ -27,12 +27,12 @@ export function TransactionStatus(props: {
         getL2toL1Msg,
     } = useArbitrumBridge();
 
-    const [remainingHours, setRemainingHours] = useState<number>();
     const [transaction, setTransaction] = useState<Transaction>(props.tx);
     const ref = useRef<HTMLDivElement>(null);
     const isVisible = useOnScreen(ref);
     const { publicParentClient, childProvider } = useWeb3ClientContext();
     const [triggered, setTriggered] = useState(false);
+    const remainingHours = transaction.delayedInboxTimestamp ? calculateRemainingHours(transaction.delayedInboxTimestamp) : undefined
 
     const forceIncludeTx = useMutation({
         mutationFn: forceInclude,
@@ -93,16 +93,14 @@ export function TransactionStatus(props: {
             !transaction.delayedInboxTimestamp,
     });
 
-    function recalculateRemainingHours(timestamp: number) {
+    function calculateRemainingHours(timestamp: number) {
         const dueDate = addDays(timestamp, 1);
         const remainingHours = intervalToDuration({
             start: Date.now(),
             end: dueDate,
         }).hours;
 
-        setRemainingHours(
-            !remainingHours || remainingHours < 0 ? 0 : remainingHours
-        );
+        return (!remainingHours || remainingHours < 0) ? 0 : remainingHours;
     }
 
     function updateTx(updatedTx: Transaction) {
@@ -163,14 +161,12 @@ export function TransactionStatus(props: {
     }
 
     useEffect(() => {
-        if (transaction.delayedInboxTimestamp)
-            recalculateRemainingHours(transaction.delayedInboxTimestamp);
-        else if (delayedInboxTxTimestamp)
+        if (delayedInboxTxTimestamp)
             updateTx({
                 ...transaction,
                 delayedInboxTimestamp: delayedInboxTxTimestamp,
             });
-    }, [delayedInboxTxTimestamp, transaction.delayedInboxTimestamp]);
+    }, [delayedInboxTxTimestamp]);
 
     useEffect(() => {
         if (claimStatusData && claimStatusData !== ClaimStatus.PENDING)
