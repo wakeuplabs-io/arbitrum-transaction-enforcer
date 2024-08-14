@@ -37,10 +37,15 @@ export default function ErrorMessage2({ error }: { error?: any }) {
 }
 
 function parseReason(serializedCause: any, walletAddress?: string) {
-  let reason =
-    serializedCause && serializedCause.reason
-      ? (serializedCause.reason as string)
-      : "";
+  let reason = "";
+  if (serializedCause) {
+    if (serializedCause.reason)
+      reason = serializedCause.reason
+    if (serializedCause.details)
+      reason = serializedCause.details
+    if (serializedCause.data?.message)
+      reason = serializedCause.data.message
+  }
 
   const addresses = reason.match(/(\b0x[a-f0-9]+\b)/g) as string[];
 
