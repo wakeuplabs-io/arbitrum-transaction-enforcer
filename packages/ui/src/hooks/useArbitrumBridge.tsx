@@ -147,7 +147,7 @@ export default function useArbitrumBridge() {
   }
 
   async function claimFunds(props: { l2ToL1Msg?: ChildToParentMessageWriter, parentSigner: ethers.providers.JsonRpcSigner, childProvider: ethers.providers.JsonRpcProvider }) {
-
+    await ensureChainId(parentChainId);
     if (!props.l2ToL1Msg) {
       throw new Error(
         "Provide an L2 transaction that sends an L2 to L1 message"

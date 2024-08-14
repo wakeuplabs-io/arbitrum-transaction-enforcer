@@ -1,3 +1,4 @@
+import { useAlertContext } from "@/contexts/alert-context";
 import { useWeb3ClientContext } from "@/contexts/web3-client-context";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import useOnScreen from "@/hooks/useOnScreen";
@@ -33,23 +34,21 @@ export function TransactionStatus(props: {
     const { publicParentClient, childProvider } = useWeb3ClientContext();
     const [triggered, setTriggered] = useState(false);
     const remainingHours = transaction.delayedInboxTimestamp ? calculateRemainingHours(transaction.delayedInboxTimestamp) : undefined
+    const { setError } = useAlertContext();
 
     const forceIncludeTx = useMutation({
         mutationFn: forceInclude,
-        onError: (e) =>
-            window.alert("Something went wrong, please try again. " + e.message),
+        onError: setError
     });
 
     const confirmTx = useMutation({
         mutationFn: pushChildTxToParent,
-        onError: (e) =>
-            window.alert("Something went wrong, please try again. " + e.message),
+        onError: setError
     });
 
     const claimFundsTx = useMutation({
         mutationFn: claimFunds,
-        onError: (e) =>
-            window.alert("Something went wrong, please try again. " + e.message),
+        onError: setError
     });
 
     const { data: l2ToL1Msg, isFetching: fetchingL2ToL1Msg } = useQuery({

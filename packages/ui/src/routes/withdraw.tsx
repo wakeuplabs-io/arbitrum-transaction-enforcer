@@ -1,4 +1,5 @@
 import EthIcon from "@/assets/ethereum-icon.svg";
+import { useAlertContext } from "@/contexts/alert-context";
 import { useWeb3ClientContext } from "@/contexts/web3-client-context";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import {
@@ -53,7 +54,7 @@ function WithdrawScreen() {
   const [approvedTime, setApprovedTime] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const { initiateWithdraw, signer } = useArbitrumBridge();
-
+  const { setError } = useAlertContext();
   const { data: withdrawPrice, isFetching: withdrawPriceFetching } = useQuery({
     queryKey: ["withdrawPrice"],
     queryFn: () => getMockedL2WithdrawPrice(childProvider),
@@ -84,8 +85,7 @@ function WithdrawScreen() {
           navigate({ to: `/activity/${tx.bridgeHash}` });
         })
         .catch((e) => {
-          console.error(e);
-          window.alert("Something went wrong, please try again");
+          setError(e);
         })
         .finally(() => setLoading(false));
   }

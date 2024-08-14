@@ -6,6 +6,7 @@ import ReactDOM from "react-dom/client";
 import { lightTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
+import { AlertProvider } from "./contexts/alert-context";
 import { Web3ClientProvider } from "./contexts/web3-client-context";
 import config from "./lib/wagmi-config";
 import "./main.css";
@@ -33,7 +34,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           theme={lightTheme({ borderRadius: "medium" })}
         >
           <Web3ClientProvider>
-            <RouterProvider router={router} />
+            <AlertProvider>
+              <RouterProvider router={router} />
+            </AlertProvider>
           </Web3ClientProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
