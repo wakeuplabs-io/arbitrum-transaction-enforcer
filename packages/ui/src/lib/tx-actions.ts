@@ -14,14 +14,3 @@ export async function getTimestampFromTxHash(
 
   return blockTimestamp;
 }
-
-export async function getTimestampFromBlock(
-  blockNumber: bigint,
-  client: PublicClient
-) {
-  const blockTimestamp = await client
-    .getBlock({ blockNumber: blockNumber })
-    .then((x) => Number(x.timestamp) * 1000);
-
-  return blockTimestamp;
-}
