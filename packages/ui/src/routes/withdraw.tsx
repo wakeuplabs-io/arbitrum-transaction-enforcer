@@ -118,7 +118,7 @@ function WithdrawScreen() {
       </button>
 
       {/* amount */}
-      <div className="flex items-center justify-between bg-neutral-50/1 border border-neutral-200 rounded-2xl md:p-6 p-4">
+      <div className="flex items-center justify-between bg-neutral-50 border border-neutral-200 rounded-2xl md:p-6 p-4">
         <div className="flex items-center gap-3">
           <img src={EthIcon} alt="ethereum icon" />
           <div className="flex items-end space-x-1">
@@ -133,8 +133,8 @@ function WithdrawScreen() {
       </div>
 
       {/* summary */}
-      <div className="flex grow justify-between items-center flex-col bg-neutral-50/1 border border-neutral-200 rounded-2xl p-4 md:p-6 gap-6">
-        <div className="bg-[#C2DCFF] text-sm rounded-2xl p-4">
+      <div className="flex grow justify-between items-center flex-col bg-neutral-50 border border-neutral-200 rounded-2xl p-4 md:p-6 gap-6">
+        <div className="text-sm rounded-2xl p-4">
           You are about to withdraw funds from Arbitrum to Ethereum. This
           process requires 2 transactions and gas fees in ETH. Any doubts?{" "}
           <a href="#" className="link">
@@ -230,12 +230,12 @@ function WithdrawScreen() {
       </div>
 
       {/* terms */}
-      <div className="flex grow justify-between flex-col text-start bg-neutral-50/1 border border-neutral-200 rounded-2xl p-4 md:p-6 gap-6">
+      <div className="flex grow justify-between flex-col text-start bg-neutral-50 border border-neutral-200 rounded-2xl p-4 md:p-6 gap-6">
         <div className="flex gap-4 md:gap-6">
           <input
             id="terms-time"
             type="checkbox"
-            className="cursor-pointer"
+            className="cursor-pointer accent-primary"
             checked={approvedTime}
             onChange={() => setApprovedTime((v) => !v)}
           />
@@ -248,7 +248,7 @@ function WithdrawScreen() {
           <input
             id="terms-sequencer"
             type="checkbox"
-            className="cursor-pointer"
+            className="cursor-pointer accent-primary"
             checked={approvedSequencerMaySpeedUp}
             onChange={() => setApprovedSequencerMaySpeedUp((v) => !v)}
           />
@@ -262,7 +262,7 @@ function WithdrawScreen() {
           <input
             id="terms-fees"
             type="checkbox"
-            className="cursor-pointer"
+            className="cursor-pointer accent-primary"
             checked={approvedAproxFees}
             onChange={() => setApprovedAproxFees((v) => !v)}
           />

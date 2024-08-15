@@ -54,7 +54,7 @@ function HomeScreen() {
   return (
     <form className="max-w-xl mx-auto" onSubmit={handleSubmit} noValidate>
       <div className="flex flex-col gap-6">
-        <div className="flex text-left justify-between items-center bg-neutral-50/1 border border-neutral-200 rounded-2xl p-5">
+        <div className="flex text-left justify-between items-center bg-neutral-50 border border-neutral-200 rounded-2xl p-5">
           <div className="flex flex-row gap-3 items-start">
             <img src={ArbitrumIcon} alt="arbitrum icon" />
             <div>
@@ -77,7 +77,7 @@ function HomeScreen() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col grow justify-between items-center bg-neutral-50/1 border border-neutral-200 rounded-2xl p-4 pt-0 h-[21rem]">
+        <div className="flex flex-col grow justify-between items-center bg-neutral-50 border border-neutral-200 rounded-2xl p-4 pt-0 h-[21rem]">
           <div className="flex flex-col grow items-center">
             <div className="flex flex-col grow items-center justify-center">
               <input
@@ -86,7 +86,7 @@ function HomeScreen() {
                 onChange={(e) => { setAmountEth(e.target.value); setError(undefined); }}
                 placeholder="0"
                 type="number"
-                className={cn("flex bg-neutral-50/1 text-primary-700 text-center text-7xl w-full outline-none remove-arrow font-semibold duration-200 ease-in-out", { "text-red-600": error })}
+                className={cn("flex bg-transparent text-primary-700 text-center text-7xl w-full outline-none remove-arrow font-semibold duration-200 ease-in-out", { "text-red-600": error })}
               />
               <div className="flex gap-1 ml-4 text-neutral-400 items-center">
                 <div className="text-base">
@@ -122,7 +122,7 @@ function HomeScreen() {
             </div>
           </div>
         </div>
-        <div className="flex justify-between items-center flex-col gap-4 bg-neutral-50/1 border border-neutral-200 rounded-2xl p-5">
+        <div className="flex justify-between items-center flex-col gap-4 bg-neutral-50 border border-neutral-200 rounded-2xl p-5">
           <div className="w-full flex justify-between items-center">
             <div className="flex gap-3 text-primary-700">
               <img src={WalletIcon} alt="wallet icon" />
