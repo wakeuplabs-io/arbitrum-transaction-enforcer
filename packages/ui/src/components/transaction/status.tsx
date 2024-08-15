@@ -1,4 +1,4 @@
-import { useAlertContext } from "@/contexts/alert-context";
+import { useAlertContext } from "@/contexts/alert/alert-context";
 import { useWeb3ClientContext } from "@/contexts/web3-client-context";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import useOnScreen from "@/hooks/useOnScreen";
