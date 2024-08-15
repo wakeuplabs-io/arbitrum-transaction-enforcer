@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from "ethers";
-import { formatEther, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { Address } from "viem";
 
 export interface ITxReq extends ethers.providers.TransactionRequest {
@@ -29,9 +29,7 @@ export async function getParentTxPriceFromGasLimit(
     .getGasPrice()
     .then((x) => BigNumber.from(x));
   const L1BaseFee = parseUnits("1500000000", "wei");
-  const L1TxPrice = formatEther(
-    BigNumber.from(gasLimit).mul(gasPrice.add(L1BaseFee))
-  );
+  const L1TxPrice = BigNumber.from(gasLimit).mul(gasPrice.add(L1BaseFee));
 
   return L1TxPrice;
 }
@@ -44,9 +42,7 @@ export async function getL1TxPrice(
     .then((x) => BigNumber.from(x));
   const estimated = await parentProvider.estimateGas(tx);
   const L1BaseFee = parseUnits("1500000000", "wei");
-  const L1TxPrice = formatEther(
-    BigNumber.from(estimated).mul(gasPrice.add(L1BaseFee))
-  );
+  const L1TxPrice = BigNumber.from(estimated).mul(gasPrice.add(L1BaseFee));
 
   return L1TxPrice;
 }
@@ -59,7 +55,7 @@ export async function getChildTxPrice(
     .getGasPrice()
     .then((x) => BigNumber.from(x));
   const estimated = await childProvider.estimateGas(tx);
-  const L2TxPrice = formatEther(BigNumber.from(estimated).mul(gasPrice));
+  const L2TxPrice = BigNumber.from(estimated).mul(gasPrice);
 
   return L2TxPrice;
 }

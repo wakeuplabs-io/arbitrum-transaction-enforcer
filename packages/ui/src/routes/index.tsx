@@ -3,12 +3,13 @@ import EthereumIcon from "@/assets/ethereum-icon.svg";
 import WalletIcon from "@/assets/wallet.svg";
 import CustomConnectButton from "@/components/connect-wallet";
 import ErrorMessage from "@/components/error-message";
+import { useEthPrice } from "@/hooks/use-eth-price";
 import useArbitrumBalance from "@/hooks/useArbitrumBalance";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import cn from "classnames";
 import { parseUnits } from "ethers/lib/utils";
-import { CircleArrowRight } from 'lucide-react';
+import { ArrowRightLeft, CircleArrowRight } from 'lucide-react';
 import { useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -27,6 +28,7 @@ function HomeScreen() {
   const { openConnectModal } = useConnectModal();
   const [amountEth, setAmountEth] = useState<string>("");
   const [error, setError] = useState<FormError>();
+  const { ethPrice } = useEthPrice();
 
   function handleSubmit() {
     const amount = parseUnits(amountEth, 18);
@@ -45,6 +47,9 @@ function HomeScreen() {
   function triggerError(error: FormError) {
     setError(error)
   }
+
+  const amountUSD = (Math.max(+amountEth, 0) * (ethPrice ?? 0));
+
 
   return (
     <form className="max-w-xl mx-auto" onSubmit={handleSubmit} noValidate>
@@ -73,15 +78,23 @@ function HomeScreen() {
           </div>
         </div>
         <div className="flex flex-col grow justify-between items-center bg-neutral-50/1 border border-neutral-200 rounded-2xl p-4 pt-0 h-[21rem]">
-          <div className="flex flex-col grow items-center justify-center">
-            <input
-              id="amount-input"
-              value={amountEth}
-              onChange={(e) => { setAmountEth(e.target.value); setError(undefined); }}
-              placeholder="0"
-              type="number"
-              className={cn("flex grow bg-neutral-50/1 text-primary-700 text-center text-7xl w-full outline-none remove-arrow font-semibold duration-200 ease-in-out", { "text-red-600": error })}
-            />
+          <div className="flex flex-col grow items-center">
+            <div className="flex flex-col grow items-center justify-center">
+              <input
+                id="amount-input"
+                value={amountEth}
+                onChange={(e) => { setAmountEth(e.target.value); setError(undefined); }}
+                placeholder="0"
+                type="number"
+                className={cn("flex bg-neutral-50/1 text-primary-700 text-center text-7xl w-full outline-none remove-arrow font-semibold duration-200 ease-in-out", { "text-red-600": error })}
+              />
+              <div className="flex gap-1 ml-4 text-neutral-400 items-center">
+                <div className="text-base">
+                  ~ {amountUSD.toString()} USD
+                </div>
+                <ArrowRightLeft size={18} />
+              </div>
+            </div>
             <div className={cn("flex justify-self-end text-red-600 h-8")}>
               {/* <a className={cn("duration-200 ease-in-out", { "opacity-0": !error })}> */}
               {error?.amount && <ErrorMessage label="Only positive amounts allowed" />}
@@ -158,6 +171,6 @@ function HomeScreen() {
             : "Connect your wallet to withdraw"}
         </button>
       </div>
-    </form>
+    </form >
   );
 }

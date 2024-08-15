@@ -1,5 +1,6 @@
 import EthIcon from "@/assets/ethereum-icon.svg";
 import { useWeb3ClientContext } from "@/contexts/web3-client-context";
+import { useEthPrice } from "@/hooks/use-eth-price";
 import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import {
   getMockedL1ClaimTxGasLimit,
@@ -40,12 +41,7 @@ function WithdrawScreen() {
   const navigate = useNavigate();
   const { parentProvider, childProvider } = useWeb3ClientContext();
   const { amount: amountInWei } = Route.useSearch();
-
-  useEffect(() => {
-    if (BigNumber.from(amountInWei).lte(0)) {
-      navigate({ to: "/" });
-    }
-  }, [amountInWei]);
+  const { ethPrice } = useEthPrice();
 
   const [approvedAproxFees, setApprovedAproxFees] = useState<boolean>(false);
   const [approvedSequencerMaySpeedUp, setApprovedSequencerMaySpeedUp] =
@@ -58,16 +54,19 @@ function WithdrawScreen() {
     queryKey: ["withdrawPrice"],
     queryFn: () => getMockedL2WithdrawPrice(childProvider),
     refetchOnWindowFocus: true,
+    initialData: BigNumber.from(0),
   });
   const { data: confirmPrice, isFetching: confirmPriceFetching } = useQuery({
     queryKey: ["confirmPrice"],
     queryFn: () => getMockedSendL1MsgPrice(parentProvider),
     refetchOnWindowFocus: true,
+    initialData: BigNumber.from(0),
   });
   const { data: claimPrice, isFetching: claimPriceFetching } = useQuery({
     queryKey: ["claimPrice"],
     queryFn: () => getMockedL1ClaimTxGasLimit(parentProvider),
     refetchOnWindowFocus: true,
+    initialData: BigNumber.from(0),
   });
 
   function onContinue() {
@@ -78,7 +77,7 @@ function WithdrawScreen() {
           const tx: Transaction = {
             bridgeHash: l2Txhash,
             amount: amountInWei,
-            claimStatus: ClaimStatus.PENDING
+            claimStatus: ClaimStatus.PENDING,
           };
           transactionsStorageService.create(tx);
           navigate({ to: `/activity/${tx.bridgeHash}` });
@@ -93,6 +92,20 @@ function WithdrawScreen() {
   const canContinue = useMemo(() => {
     return approvedAproxFees && approvedSequencerMaySpeedUp && approvedTime;
   }, [approvedAproxFees, approvedSequencerMaySpeedUp, approvedTime]);
+
+  const amountUSD = (ethPrice * +formatEther(amountInWei)).toFixed(3);
+  // const withdrawUSD = (ethPrice * +formatEther(amountInWei)).toFixed(3);
+  const withdrawUSD = (+formatEther(withdrawPrice) * ethPrice).toFixed(2);
+  const confirmUSD = (+formatEther(confirmPrice) * ethPrice).toFixed(2);
+  const claimUSD = (+formatEther(claimPrice) * ethPrice).toFixed(2);
+  // const amountUSD = (Math.max(+amountInWei, 0) * ethPrice);
+  // const amountUSD = (Math.max(+amountInWei, 0) * ethPrice);
+
+  useEffect(() => {
+    if (BigNumber.from(amountInWei).lte(0)) {
+      navigate({ to: "/" });
+    }
+  }, [amountInWei]);
 
   return (
     <div className="flex flex-col max-w-xl mx-auto gap-6">
@@ -116,7 +129,7 @@ function WithdrawScreen() {
             <div className="ml-0.5 font-bold">ETH</div>
           </div>
         </div>
-        <div className="text-neutral-400">~ - USD</div>
+        <div className="text-neutral-400">~ ${amountUSD} USD</div>
       </div>
 
       {/* summary */}
@@ -136,19 +149,20 @@ function WithdrawScreen() {
           <div className="flex flex-col md:flex-row md:justify-between w-full">
             <span className="block text-left">Initiate Withdrawal</span>
             <div className="flex items-center flex-row gap-2">
-              <span className="text-sm flex flex-row items-center gap-3">
-                {withdrawPriceFetching ? (
-                  <LoaderCircle
-                    strokeWidth={3}
-                    size={10}
-                    className="animate-spin"
-                  />
-                ) : (
-                  withdrawPrice?.slice(0, 10) ?? "-"
-                )}{" "}
-                ETH
-              </span>
-              <span className="text-neutral-400 text-sm">~ $-</span>
+              {withdrawPriceFetching ? (
+                <LoaderCircle
+                  strokeWidth={3}
+                  size={10}
+                  className="animate-spin"
+                />
+              ) : (
+                <span className="text-sm flex flex-row items-center gap-3">
+                  {formatEther(withdrawPrice)?.slice(0, 10) ?? "-"} ETH
+                  <span className="text-neutral-400 text-sm">
+                    ~ ${withdrawUSD}
+                  </span>
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -160,18 +174,20 @@ function WithdrawScreen() {
           <div className="flex flex-col md:flex-row md:justify-between w-full">
             <span className="block text-left">Confirm Withdrawal</span>
             <div className="flex items-center flex-row gap-2">
-              <span className="text-sm flex flex-row items-center gap-3">
-                {confirmPriceFetching ? (
-                  <LoaderCircle
-                    strokeWidth={3}
-                    size={10}
-                    className="animate-spin"
-                  />
-                ) : (confirmPrice?.slice(0, 10) ?? "-"
-                )}{" "}
-                ETH
-              </span>
-              <span className="text-neutral-400 text-sm">~ $-</span>
+              {confirmPriceFetching ? (
+                <LoaderCircle
+                  strokeWidth={3}
+                  size={10}
+                  className="animate-spin"
+                />
+              ) : (
+                <span className="text-sm flex flex-row items-center gap-3">
+                  {formatEther(confirmPrice)?.slice(0, 10) ?? "-"} ETH
+                  <span className="text-neutral-400 text-sm">
+                    ~ ${confirmUSD}
+                  </span>
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -194,18 +210,20 @@ function WithdrawScreen() {
             <p className="text-left">Claim funds on Ethereum</p>
 
             <div className="flex items-center flex-row just gap-3">
-              <span className="text-sm flex flex-row items-center gap-3">
-                {claimPriceFetching ? (
-                  <LoaderCircle
-                    strokeWidth={3}
-                    size={10}
-                    className="animate-spin"
-                  />
-                ) : (claimPrice?.slice(0, 10) ?? "-"
-                )}{" "}
-                ETH
-              </span>
-              <span className="text-neutral-400 text-sm">~ $-</span>
+              {claimPriceFetching ? (
+                <LoaderCircle
+                  strokeWidth={3}
+                  size={10}
+                  className="animate-spin"
+                />
+              ) : (
+                <span className="text-sm flex flex-row items-center gap-3">
+                  {formatEther(claimPrice)?.slice(0, 10)} ETH
+                  <span className="text-neutral-400 text-sm">
+                    ~ ${claimUSD}
+                  </span>
+                </span>
+              )}
             </div>
           </div>
         </div>
