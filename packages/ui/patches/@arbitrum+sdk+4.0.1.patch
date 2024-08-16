@@ -1,0 +1,169 @@
+diff --git a/node_modules/@arbitrum/sdk/dist/lib/inbox/inbox.d.ts b/node_modules/@arbitrum/sdk/dist/lib/inbox/inbox.d.ts
+index 439e296..361a410 100644
+--- a/node_modules/@arbitrum/sdk/dist/lib/inbox/inbox.d.ts
++++ b/node_modules/@arbitrum/sdk/dist/lib/inbox/inbox.d.ts
+@@ -79,6 +79,23 @@ export declare class InboxTools {
+      * @returns The parent delayed inbox's transaction itself.
+      */
+     sendChildSignedTx(signedTx: string): Promise<ContractTransaction | null>;
++
++    /**
++     * Assemble a transaction with msg.to, msg.value and msg.data.
++     * This is used right below to provide a transaction to signChildTx and sendChildTx.
++     * @param txRequest A signed transaction which can be sent directly to chain,
++     * tx.to, tx.data, tx.value must be provided when not contract creation, if
++     * contractCreation is true, no need provide tx.to. tx.gasPrice and tx.nonce
++     * can be overrided. (You can also send contract creation transaction by set tx.to
++     * to zero address or null)
++     * @param childSigner ethers Signer type, used to sign Chain transaction
++     * @returns The parent delayed inbox's transaction signed data.
++     */
++    assembleChildTx(
++        txRequest: RequiredTransactionRequestType,
++        childSigner: Signer
++    ): Promise<RequiredTransactionRequestType>
++
+     /**
+      * Sign a transaction with msg.to, msg.value and msg.data.
+      * You can use this as a helper to call inboxTools.sendChainSignedMessage
+@@ -91,6 +108,26 @@ export declare class InboxTools {
+      * @param childSigner ethers Signer type, used to sign Chain transaction
+      * @returns The parent delayed inbox's transaction signed data.
+      */
+-    signChildTx(txRequest: RequiredTransactionRequestType, childSigner: Signer): Promise<string>;
++    signChildTx(
++        txRequest: RequiredTransactionRequestType,
++        childSigner: Signer
++    ): Promise<string>;
++
++    /**
++     * Sign a transaction with msg.to, msg.value and msg.data.
++     * A copy of `signChildTx` above but that instead of just signing also sends the transaction.
++     * This is a workaround wallets in browsers not supporting signing only.
++     * @param txRequest A signed transaction which can be sent directly to chain,
++     * tx.to, tx.data, tx.value must be provided when not contract creation, if
++     * contractCreation is true, no need provide tx.to. tx.gasPrice and tx.nonce
++     * can be overrided. (You can also send contract creation transaction by set tx.to
++     * to zero address or null)
++     * @param childSigner ethers Signer type, used to sign and send Chain transaction
++     * @returns The parent delayed inbox's transaction signed data.
++     */
++    sendChildTx(
++        txRequest: RequiredTransactionRequestType,
++        childSigner: Signer
++    ): Promise<string>;
+ }
+-export {};
++export { };
+diff --git a/node_modules/@arbitrum/sdk/dist/lib/inbox/inbox.js b/node_modules/@arbitrum/sdk/dist/lib/inbox/inbox.js
+index 353545d..c4c0843 100644
+--- a/node_modules/@arbitrum/sdk/dist/lib/inbox/inbox.js
++++ b/node_modules/@arbitrum/sdk/dist/lib/inbox/inbox.js
+@@ -121,7 +121,7 @@ class InboxTools {
+             {
+                 targetAddr: sequencerInbox.address,
+                 encoder: () => sequencerInbox.interface.encodeFunctionData('maxTimeVariation'),
+-                decoder: (returnData) => sequencerInbox.interface.decodeFunctionResult('maxTimeVariation', returnData)[0],
++                decoder: (returnData) => sequencerInbox.interface.decodeFunctionResult('maxTimeVariation', returnData),
+             },
+             multicall.getBlockNumberInput(),
+             multicall.getCurrentBlockTimestampInput(),
+@@ -204,8 +204,8 @@ class InboxTools {
+             return null;
+         const block = await this.parentProvider.getBlock(eventInfo.blockHash);
+         return await sequencerInbox.functions.forceInclusion(eventInfo.event.messageIndex.add(1), eventInfo.event.kind, [eventInfo.blockNumber, block.timestamp], eventInfo.event.baseFeeL1, eventInfo.event.sender, eventInfo.event.messageDataHash,
+-        // we need to pass in {} because if overrides is undefined it thinks we've provided too many params
+-        overrides || {});
++            // we need to pass in {} because if overrides is undefined it thinks we've provided too many params
++            overrides || {});
+     }
+     /**
+      * Send Child Chain signed tx using delayed inbox, which won't alias the sender's address
+@@ -220,10 +220,10 @@ class InboxTools {
+         const sendData = ethers_1.ethers.utils.solidityPack(['uint8', 'bytes'], [ethers_1.ethers.utils.hexlify(message_1.InboxMessageKind.L2MessageType_signedTx), signedTx]);
+         return await delayedInbox.functions.sendL2Message(sendData);
+     }
++
+     /**
+-     * Sign a transaction with msg.to, msg.value and msg.data.
+-     * You can use this as a helper to call inboxTools.sendChainSignedMessage
+-     * above.
++     * Assemble a transaction with msg.to, msg.value and msg.data.
++     * This is used right below to provide a transaction to signChildTx and sendChildTx.
+      * @param txRequest A signed transaction which can be sent directly to chain,
+      * tx.to, tx.data, tx.value must be provided when not contract creation, if
+      * contractCreation is true, no need provide tx.to. tx.gasPrice and tx.nonce
+@@ -232,7 +232,7 @@ class InboxTools {
+      * @param childSigner ethers Signer type, used to sign Chain transaction
+      * @returns The parent delayed inbox's transaction signed data.
+      */
+-    async signChildTx(txRequest, childSigner) {
++    async assembleChildTx(txRequest, childSigner) {
+         const tx = Object.assign({}, txRequest);
+         const contractCreation = this.isContractCreation(tx);
+         if (!(0, lib_1.isDefined)(tx.nonce)) {
+@@ -262,7 +262,8 @@ class InboxTools {
+         }
+         //estimate gas on child chain
+         try {
+-            tx.gasLimit = (await this.estimateArbitrumGas(tx, childSigner.provider)).gasEstimateForChild;
++            // TODO: fix this
++            // tx.gasLimit = (await this.estimateArbitrumGas(tx, childSigner.provider)).gasEstimateForChild;
+         }
+         catch (error) {
+             throw new errors_1.ArbSdkError('execution failed (estimate gas failed)');
+@@ -270,7 +271,53 @@ class InboxTools {
+         if (contractCreation) {
+             delete tx.to;
+         }
+-        return await childSigner.signTransaction(tx);
++        return tx
++    }
++
++    /**
++     * Sign a transaction with msg.to, msg.value and msg.data.
++     * You can use this as a helper to call inboxTools.sendChainSignedMessage
++     * above.
++     * @param txRequest A signed transaction which can be sent directly to chain,
++     * tx.to, tx.data, tx.value must be provided when not contract creation, if
++     * contractCreation is true, no need provide tx.to. tx.gasPrice and tx.nonce
++     * can be overrided. (You can also send contract creation transaction by set tx.to
++     * to zero address or null)
++     * @param childSigner ethers Signer type, used to sign Chain transaction
++     * @returns The parent delayed inbox's transaction signed data.
++     */
++    async signChildTx(
++        txRequest,
++        childSigner
++    ) {
++        const tx = await this.assembleChildTx(
++            txRequest,
++            childSigner
++        )
++        return await childSigner.signTransaction(tx)
++    }
++
++    /**
++     * Sign a transaction with msg.to, msg.value and msg.data.
++     * A copy of `signChildTx` above but that instead of just signing also sends the transaction.
++     * This is a workaround wallets in browsers not supporting signing only.
++     * @param txRequest A signed transaction which can be sent directly to chain,
++     * tx.to, tx.data, tx.value must be provided when not contract creation, if
++     * contractCreation is true, no need provide tx.to. tx.gasPrice and tx.nonce
++     * can be overrided. (You can also send contract creation transaction by set tx.to
++     * to zero address or null)
++     * @param childSigner ethers Signer type, used to sign and send Chain transaction
++     * @returns The parent delayed inbox's transaction signed data.
++     */
++    async sendChildTx(
++        txRequest,
++        childSigner
++    ) {
++        const tx = await this.assembleChildTx(
++            txRequest,
++            childSigner
++        )
++        return (await childSigner.sendTransaction(tx)).hash
+     }
+ }
+ exports.InboxTools = InboxTools;

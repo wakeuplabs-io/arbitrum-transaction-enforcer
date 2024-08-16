@@ -43,7 +43,7 @@ importers:
   packages/arbitrum-force-transaction:
     dependencies:
       '@arbitrum/sdk':
-        specifier: ^4.0.1
+        specifier: 4.0.1
         version: 4.0.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       axios:
         specifier: ^1.7.2
@@ -80,8 +80,8 @@ importers:
   packages/ui:
     dependencies:
       '@arbitrum/sdk':
-        specifier: 4.0.0
-        version: 4.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        specifier: 4.0.1
+        version: 4.0.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@ethersproject/bignumber':
         specifier: 5.7.0
         version: 5.7.0
@@ -202,10 +202,6 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
-
-  '@arbitrum/sdk@4.0.0':
-    resolution: {integrity: sha512-wNZFRs4yYxd6Pyc6xEjksp3C59PikmmVPIw49ceMoLY5D0e6xJt2nuA7jjsemDgRe7q6EvLFvHAY2At6XUWrkg==}
-    engines: {node: '>=v11', npm: please-use-yarn, yarn: '>= 1.0.0'}
 
   '@arbitrum/sdk@4.0.1':
     resolution: {integrity: sha512-uW0Pe/oICbmlHpIpYOaHHWsNQRG+3UbCa3s0SJsp2O1Kt9b0M0CX/fEdFOFLyAi3OxHonNEfzhfvQrALy9C3Yw==}
@@ -8406,17 +8402,6 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
-
-  '@arbitrum/sdk@4.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@ethersproject/address': 5.7.0
-      '@ethersproject/bignumber': 5.7.0
-      '@ethersproject/bytes': 5.7.0
-      async-mutex: 0.4.1
-      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
 
   '@arbitrum/sdk@4.0.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:

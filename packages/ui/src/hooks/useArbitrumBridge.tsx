@@ -40,8 +40,7 @@ export default function useArbitrumBridge() {
     await ensureChainId(childNetworkId);
     const inboxSdk = new InboxTools(signer!, l2Network);
 
-    // extract l2's tx hash first so we can check if this tx executed on l2 later.
-    const l2Txhash = (await inboxSdk.signChildTx(tx, childSigner)) as Address;
+    const l2Txhash = (await inboxSdk.sendChildTx(tx, childSigner)) as Address;
 
     return l2Txhash;
   }
