@@ -8,6 +8,7 @@
     "build": "tsc",
     "test": "jest ./tests --runInBand",
     "postinstall": "patch-package",
+    "start-forks": "concurrently --kill-others \"npm run start:eth\" \"npm run start:arb\"",
     "start:eth": "hardhat node --port 4000 --config hardhat-eth.config.js",
     "start:arb": "hardhat node --port 4001 --config hardhat-arb.config.js"
   },

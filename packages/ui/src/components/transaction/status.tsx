@@ -1,6 +1,6 @@
 import { useAlertContext } from "@/contexts/alert/alert-context";
 import { useWeb3ClientContext } from "@/contexts/web3-client-context";
-import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
+import useArbitrum, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import useOnScreen from "@/hooks/useOnScreen";
 import { Transaction, transactionsStorageService } from "@/lib/transactions";
 import { getTimestampFromTxHash } from "@/lib/tx-actions";
@@ -25,13 +25,13 @@ export function TransactionStatus(props: {
         getClaimStatus,
         claimFunds,
         pushChildTxToParent,
-        getL2toL1Msg,
-    } = useArbitrumBridge();
+        getL2ToL1Msg,
+    } = useArbitrum();
 
     const [transaction, setTransaction] = useState<Transaction>(props.tx);
     const ref = useRef<HTMLDivElement>(null);
     const isVisible = useOnScreen(ref);
-    const { publicParentClient, childProvider } = useWeb3ClientContext();
+    const { publicParentClient } = useWeb3ClientContext();
     const [triggered, setTriggered] = useState(false);
     const remainingHours = transaction.delayedInboxTimestamp ? calculateRemainingHours(transaction.delayedInboxTimestamp) : undefined
     const { setError } = useAlertContext();
@@ -53,7 +53,7 @@ export function TransactionStatus(props: {
 
     const { data: l2ToL1Msg, isFetching: fetchingL2ToL1Msg } = useQuery({
         queryKey: ["l2ToL1Msg", transaction.bridgeHash],
-        queryFn: () => getL2toL1Msg(transaction.bridgeHash, childProvider, signer!),
+        queryFn: () => getL2ToL1Msg(transaction.bridgeHash, signer!),
         enabled:
             triggered &&
             !!signer &&
@@ -64,7 +64,7 @@ export function TransactionStatus(props: {
 
     const { data: claimStatusData, isFetching: fetchingClaimStatus } = useQuery({
         queryKey: ["claimStatus", transaction.bridgeHash],
-        queryFn: () => getClaimStatus(childProvider, l2ToL1Msg!),
+        queryFn: () => getClaimStatus(l2ToL1Msg!),
         enabled: !!l2ToL1Msg,
     });
 
@@ -140,13 +140,12 @@ export function TransactionStatus(props: {
     }
 
     function onClaim() {
-        if (!signer) return;
+        if (!signer || !l2ToL1Msg) return;
 
         claimFundsTx.mutate(
             {
                 l2ToL1Msg,
                 parentSigner: signer,
-                childProvider,
             },
             {
                 onSuccess: () => {

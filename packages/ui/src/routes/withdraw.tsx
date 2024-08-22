@@ -2,7 +2,7 @@ import EthIcon from "@/assets/ethereum-icon.svg";
 import { useAlertContext } from "@/contexts/alert/alert-context";
 import { useWeb3ClientContext } from "@/contexts/web3-client-context";
 import { useEthPrice } from "@/hooks/use-eth-price";
-import useArbitrumBridge, { ClaimStatus } from "@/hooks/useArbitrumBridge";
+import useArbitrum, { ClaimStatus } from "@/hooks/useArbitrumBridge";
 import {
   getMockedL1ClaimTxGasLimit,
   getMockedL2WithdrawPrice,
@@ -49,7 +49,7 @@ function WithdrawScreen() {
     useState<boolean>(false);
   const [approvedTime, setApprovedTime] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
-  const { initiateWithdraw, signer } = useArbitrumBridge();
+  const { initiateWithdraw, signer } = useArbitrum();
   const { setError } = useAlertContext();
   const { data: withdrawPrice, isFetching: withdrawPriceFetching } = useQuery({
     queryKey: ["withdrawPrice"],
